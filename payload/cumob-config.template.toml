@@ -1,0 +1,16 @@
+# Portable subset of the current Codex configuration.
+# The installer replaces {{MODEL_CATALOG_PATH}} with the local absolute path.
+
+model_provider = "cumob"
+model = "gpt-5.6-sol"
+disable_response_storage = true
+model_catalog_json = "{{MODEL_CATALOG_PATH}}"
+model_reasoning_effort = "high"
+
+[model_providers.cumob]
+name = "cumob"
+wire_api = "responses"
+image_api = "images"
+image_model = "gpt-image-2-ref"
+requires_openai_auth = true
+base_url = "https://api.cumob.com/v1"

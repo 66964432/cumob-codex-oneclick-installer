@@ -1,0 +1,6 @@
+.DS_Store
+dist/
+MANIFEST.sha256
+*.zip
+__pycache__/
+*.pyc

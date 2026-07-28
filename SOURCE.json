@@ -1,0 +1,11 @@
+{
+  "installer_repository": "https://github.com/66964432/cumob-codex-oneclick-installer",
+  "installer_branch": "main",
+  "skill_repository": "https://github.com/66964432/cumob-image-generation4codex",
+  "skill_branch": "main",
+  "skill_version_policy": "install-time latest from main",
+  "model_catalog_source": "payload/cumob-models.json",
+  "model_catalog_models": 10,
+  "distribution": "github-first",
+  "packaged_on": "2026-07-29"
+}
