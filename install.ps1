@@ -323,7 +323,7 @@ try {
     }
 
     Write-Host ""
-    Write-Host "CUMOB Codex installation completed."
+    Write-Host "codex 一键接入自定义路由 - cumob 篇 安装完成。"
     Write-Host "Backup: $backupDir"
     Write-Host "Skill: $skillTarget (downloaded version: $skillVersion)"
     Write-Host "Model catalog: $catalogTarget"

@@ -336,7 +336,7 @@ fi
 
 printf '%s\n' \
   "" \
-  "CUMOB Codex installation completed." \
+  "codex 一键接入自定义路由 - cumob 篇 安装完成。" \
   "Backup: $backup_dir" \
   "Skill: $SKILL_TARGET (downloaded version: $skill_version)" \
   "Model catalog: $CATALOG_TARGET" \

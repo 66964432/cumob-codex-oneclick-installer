@@ -1,9 +1,9 @@
-# CUMOB Codex 一键安装器
+# codex 一键接入自定义路由 - cumob 篇
 
 macOS / Windows 双击安装，自动完成：
 
 1. 安装最新 `cumob-image-generation4codex` Skill
-2. 写入当前 CUMOB Codex provider 配置
+2. 写入当前 codex 一键接入自定义路由 - cumob 篇 provider 配置
 3. 安装自定义模型目录 `cumob-models.json`
 4. 将 CUMOB API Key 合并进 Codex `auth.json`
 

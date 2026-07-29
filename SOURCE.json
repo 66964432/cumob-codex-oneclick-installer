@@ -7,5 +7,6 @@
   "model_catalog_source": "payload/cumob-models.json",
   "model_catalog_models": 10,
   "distribution": "github-first",
-  "packaged_on": "2026-07-29"
+  "packaged_on": "2026-07-29",
+  "display_name_zh": "codex 一键接入自定义路由 - cumob 篇"
 }

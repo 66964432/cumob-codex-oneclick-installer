@@ -1,4 +1,4 @@
-# CUMOB Codex 最短安装说明
+# codex 一键接入自定义路由 - cumob 篇
 
 适用系统：macOS / Windows  
 适用对象：最终用户
