@@ -24,6 +24,7 @@ bash "$ROOT_DIR/tests/test-install.sh"
   find \
     SOURCE.json \
     README.md \
+    README.en.md \
     LICENSE \
     install.sh \
     install.ps1 \

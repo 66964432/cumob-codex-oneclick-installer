@@ -1,13 +1,17 @@
 # codex 一键接入自定义路由 - cumob 篇
 
-macOS / Windows 双击安装，自动完成：
+[English](README.en.md)
+
+macOS / Windows 双击安装，把 Codex 一键接入 CUMOB 自定义路由。
+
+安装后自动完成：
 
 1. 安装最新 `cumob-image-generation4codex` Skill
-2. 写入当前 codex 一键接入自定义路由 - cumob 篇 provider 配置
+2. 写入 CUMOB provider 配置
 3. 安装自定义模型目录 `cumob-models.json`
 4. 将 CUMOB API Key 合并进 Codex `auth.json`
 
-设计目标：
+## 设计目标
 
 - 用户只需要下载很小的安装入口，双击即可
 - 安装时从 GitHub 实时拉取最新 Skill、配置模板、模型目录
@@ -18,26 +22,54 @@ macOS / Windows 双击安装，自动完成：
 
 - 安装器：[`66964432/cumob-codex-oneclick-installer`](https://github.com/66964432/cumob-codex-oneclick-installer)
 - Skill：[`66964432/cumob-image-generation4codex`](https://github.com/66964432/cumob-image-generation4codex)
+- 最新发布页：https://github.com/66964432/cumob-codex-oneclick-installer/releases/latest
 
-## 用户安装方式
+## 安装前准备
 
-### 方式 A：双击安装（推荐）
+1. 已安装 [Codex](https://chatgpt.com/codex)
+2. 电脑可访问 GitHub
+3. 准备好你的 CUMOB API Key
 
-1. 下载本仓库最新 Release 中的：
-   - `install-macos.command`
-   - 或 `install-windows.cmd`
+## 一键安装（推荐）
+
+### macOS
+
+1. 下载：[`install-macos.command`](https://github.com/66964432/cumob-codex-oneclick-installer/releases/latest/download/install-macos.command)
 2. 双击运行
-3. 输入 CUMOB API Key（输入不显示）
-4. 重启 Codex，或新建一个任务
+3. 如果系统提示“无法打开”，请：
+   - 右键文件 → 选择“打开”
+   - 或到“系统设置 → 隐私与安全性”中允许运行
+4. 按提示输入 CUMOB API Key
+   - 输入时不会显示字符，属正常现象
+   - 如果本机已配置过 Key，可直接回车跳过
+5. 看到 `Installation finished` 后，关闭窗口
+6. 重启 Codex，或新建一个任务
 
-即使只下载这两个入口文件，安装器也会从 GitHub 拉取：
+### Windows
+
+1. 下载：[`install-windows.cmd`](https://github.com/66964432/cumob-codex-oneclick-installer/releases/latest/download/install-windows.cmd)
+2. 双击运行
+3. 如果 SmartScreen 拦截，选择“仍要运行”
+4. 按提示输入 CUMOB API Key
+   - 输入时不会显示字符，属正常现象
+   - 如果本机已配置过 Key，可直接回车跳过
+5. 看到 `Installation finished` 后，按任意键关闭窗口
+6. 重启 Codex，或新建一个任务
+
+即使只下载入口文件，安装器也会从 GitHub 拉取：
 
 - 最新安装逻辑
 - 最新模型目录
 - 最新配置模板
 - 最新 Skill
 
-### 方式 B：直接克隆本仓库后安装
+最快安装流程：
+
+**下载入口 → 双击安装 → 输入 API Key → 重启 Codex**
+
+## 从源码安装
+
+macOS / Linux：
 
 ```bash
 git clone https://github.com/66964432/cumob-codex-oneclick-installer.git
@@ -53,12 +85,14 @@ cd cumob-codex-oneclick-installer
 .\install.ps1
 ```
 
-## 安装位置
+## 安装后会写入什么
 
-优先使用 `CODEX_HOME`。未设置时：
+默认写入位置：
 
-- macOS：`~/.codex`
-- Windows：`%USERPROFILE%\.codex`
+- 优先使用环境变量 `CODEX_HOME`
+- 未设置时：
+  - macOS：`~/.codex`
+  - Windows：`%USERPROFILE%\.codex`
 
 写入内容：
 
@@ -73,6 +107,30 @@ cd cumob-codex-oneclick-installer
 └── backups/
     └── cumob-installer-YYYYMMDD-HHMMSS/
 ```
+
+安装器会自动配置：
+
+- 最新 `cumob-image-generation4codex` Skill
+- CUMOB 模型目录
+- CUMOB provider 配置
+- API Key 到 Codex `auth.json`
+
+## 如何确认安装成功
+
+打开 Codex 后检查：
+
+1. 模型列表里能看到 CUMOB 模型，例如 `gpt-5.6-sol`
+2. 可以调用图片 Skill：`cumob-image-generation4codex`
+3. 生成图片时不再提示缺少 API Key / provider
+
+## 升级
+
+以后如果 Skill 或配置有更新：
+
+1. 再次双击同一个安装入口
+2. 安装器会重新拉取最新版本并覆盖升级
+3. 你的其他 Codex 配置会保留
+4. 旧文件会自动备份
 
 ## 配置策略
 
@@ -153,6 +211,45 @@ export CUMOB_MODELS_URL="https://raw.githubusercontent.com/66964432/cumob-codex-
 bash install.sh
 ```
 
+## 常见问题
+
+### 1. 安装失败，提示网络错误
+
+请确认：
+
+- 能打开 GitHub
+- 没有被公司代理 / 防火墙拦截
+- 可访问：
+  - `https://github.com/66964432/cumob-codex-oneclick-installer`
+  - `https://github.com/66964432/cumob-image-generation4codex`
+
+然后重新双击安装。
+
+### 2. 安装成功，但 Codex 里看不到变化
+
+请：
+
+1. 完全退出 Codex 再打开
+2. 或新建一个任务
+3. 再检查模型列表和 Skill
+
+### 3. API Key 输错了怎么办
+
+再次运行安装入口，重新输入正确 Key 即可。
+
+### 4. 会不会覆盖我原来的 Codex 配置？
+
+不会整份覆盖。安装器只会：
+
+- 更新 CUMOB 相关配置
+- 保留其他 provider / 插件 / 桌面设置
+- 先备份旧文件
+
+备份目录：
+
+- macOS：`~/.codex/backups/`
+- Windows：`%USERPROFILE%\.codex\backups\`
+
 ## 运行要求
 
 - Codex 已安装
@@ -163,7 +260,7 @@ bash install.sh
 
 ## 开发与验证
 
-macOS/Linux：
+macOS / Linux：
 
 ```bash
 bash tests/test-install.sh
@@ -187,9 +284,7 @@ CUMOB_LIVE_TEST=1 bash tests/test-install.sh
 bash build-release.sh
 ```
 
-## 仓库维护建议
-
-建议把这个目录作为独立 GitHub 仓库维护：
+## 仓库结构
 
 ```text
 cumob-codex-oneclick-installer/
@@ -203,6 +298,7 @@ cumob-codex-oneclick-installer/
 ├── scripts/
 ├── tests/
 ├── README.md
+├── README.en.md
 └── SOURCE.json
 ```
 
