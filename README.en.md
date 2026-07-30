@@ -56,6 +56,8 @@ After installation, it automatically:
 5. Press any key to close the window after `Installation finished`
 6. Restart Codex, or create a new task
 
+Parallels shared folders under `\\Mac\...` are supported. The launcher temporarily maps the UNC path to a drive letter for CMD compatibility.
+
 Even if you only download the entry file, the installer still pulls from GitHub:
 
 - Latest installer logic

@@ -56,6 +56,8 @@ macOS / Windows 双击安装，把 Codex 一键接入 CUMOB 自定义路由。
 5. 看到 `Installation finished` 后，按任意键关闭窗口
 6. 重启 Codex，或新建一个任务
 
+Parallels 的 `\\Mac\...` 共享目录也可直接运行；启动器会临时映射盘符，以兼容 CMD 不支持 UNC 当前目录的限制。
+
 即使只下载入口文件，安装器也会从 GitHub 拉取：
 
 - 最新安装逻辑
