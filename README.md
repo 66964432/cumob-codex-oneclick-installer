@@ -28,7 +28,37 @@ macOS / Windows 双击安装，把 Codex 一键接入 CUMOB 自定义路由。
 
 1. 已安装 [Codex](https://chatgpt.com/codex)
 2. 电脑可访问 GitHub
-3. 准备好你的 CUMOB API Key
+3. 准备好你的 CUMOB API Key（见下方「如何获取 CUMOB API Key」）
+
+## 如何获取 CUMOB API Key
+
+安装器本身不提供密钥，需要先到 CUMOB 平台（https://api.cumob.com）注册 / 登录后自行创建。
+
+### 平台与域名
+
+| 用途 | 域名 |
+| --- | --- |
+| 平台入口（获取密钥、账户管理） | [https://api.cumob.com](https://api.cumob.com) |
+| API 接入（环太平洋） | `https://api.cumob.com/v1` |
+| API 接入（东亚地区） | `https://api.cumob.cn/v1` |
+
+说明：
+
+- 用户访问与密钥管理请打开：https://api.cumob.com
+- 安装器里的 `base_url` 使用 API 接入地址：`https://api.cumob.com/v1` 或 `https://api.cumob.cn/v1`
+- 平台入口与 Codex 调用都走 CUMOB 域名；安装时按提示选择 `.com` / `.cn` 线路即可
+
+### 推荐步骤
+
+1. 打开 [CUMOB 平台](https://api.cumob.com)
+2. 注册账号，或使用已有账号登录
+3. 在 API Key 页面中创建 / 复制 API Key
+4. 回到本安装器，按提示粘贴该 Key
+5. 如需切换线路，安装时可选择：
+   - `1` → `https://api.cumob.com/v1`（默认）
+   - `2` → `https://api.cumob.cn/v1`
+
+如果平台页面里的菜单名称与上述描述不完全一致，以控制台实际文案为准；只要能创建并复制 API Key 即可。
 
 ## 一键安装（推荐）
 
@@ -92,9 +122,11 @@ cd cumob-codex-oneclick-installer
 默认写入位置：
 
 - 优先使用环境变量 `CODEX_HOME`
+- Windows 生图脚本还会从已安装 skill 路径反推 Codex home
 - 未设置时：
   - macOS：`~/.codex`
   - Windows：`%USERPROFILE%\.codex`
+- 受限 shell 仍解析失败时，可显式传 `--codex-home`
 
 写入内容：
 
@@ -161,6 +193,14 @@ requires_openai_auth = true
 base_url = "https://api.cumob.com/v1"
 ```
 
+`base_url` 支持 `https://api.cumob.com/v1` 与 `https://api.cumob.cn/v1`。两个域名都有效。
+
+- 安装时交互选择端点：`1 = https://api.cumob.com/v1`（默认），`2 = https://api.cumob.cn/v1`
+- 15 秒内无操作，自动选择默认 `.com`
+- `--no-prompt` / 非交互安装直接使用默认 `.com`
+- 也可通过环境变量强制指定并跳过选择：`CUMOB_BASE_URL=https://api.cumob.cn/v1`
+- 生图脚本始终读取 Codex provider 的 `base_url`，不会写死域名
+
 ## 安全
 
 - 发行包与仓库都不包含真实 API Key
@@ -213,6 +253,19 @@ export CUMOB_MODELS_URL="https://raw.githubusercontent.com/66964432/cumob-codex-
 bash install.sh
 ```
 
+Windows 图片运行时控制：
+
+```powershell
+# 跳过自动安装 Node.js，仅保留 PowerShell 后备
+$env:CUMOB_SKIP_NODE_INSTALL = "1"
+.\install.ps1 -NoPrompt
+
+# 自定义 Node 安装目录 / 下载源
+$env:CUMOB_NODE_INSTALL_DIR = "$env:LOCALAPPDATA\my-cumob-node"
+$env:CUMOB_NODE_DIST_URL = "https://nodejs.org/dist/v22.14.0/node-v22.14.0-win-x64.zip"
+.\install.ps1 -NoPrompt
+```
+
 ## 常见问题
 
 ### 1. 安装失败，提示网络错误
@@ -235,11 +288,16 @@ bash install.sh
 2. 或新建一个任务
 3. 再检查模型列表和 Skill
 
-### 3. API Key 输错了怎么办
+### 3. API Key 从哪里获取？
+
+打开 CUMOB 平台：https://api.cumob.com  
+登录后创建 / 复制 API Key，再运行安装器填入。详细步骤见上文「如何获取 CUMOB API Key」。
+
+### 4. API Key 输错了怎么办
 
 再次运行安装入口，重新输入正确 Key 即可。
 
-### 4. 会不会覆盖我原来的 Codex 配置？
+### 5. 会不会覆盖我原来的 Codex 配置？
 
 不会整份覆盖。安装器只会：
 
@@ -256,9 +314,25 @@ bash install.sh
 
 - Codex 已安装
 - 网络可访问 GitHub
-- 图片 Skill 运行时至少有一种：
-  - Node.js 18+
-  - Python 3
+- 图片 Skill 优先使用 Node.js 18+ 或 Python 3
+- Windows 安装器会自动检测运行时：
+  - 已有 Node.js 18+ 或 Python 3：直接复用
+  - 两者都没有：默认从 nodejs.org 下载 Node.js LTS，安装到 `%LOCALAPPDATA%\cumob-nodejs`，并写入当前进程 PATH 与用户 PATH
+  - 如需跳过自动安装：设置 `CUMOB_SKIP_NODE_INSTALL=1`
+  - 可选覆盖：`CUMOB_NODE_DIST_URL`、`CUMOB_NODE_INDEX_URL`、`CUMOB_NODE_INSTALL_DIR`
+- Windows 仍保留 PowerShell 5.1 后备脚本，仅在 Node/Python 不可用时应急使用
+- macOS / Linux 的图片 Skill 仍需 Node.js 18+ 或 Python 3
+
+Windows 安装后，Skill 中会增加统一启动器：
+
+```powershell
+& "$env:USERPROFILE\.codex\skills\cumob-image-generation4codex\scripts\generate-image-windows.cmd" `
+  --prompt "A quick test image" `
+  --out "$env:TEMP\cumob-test.png" `
+  --dry-run
+```
+
+该启动器会自动读取 Codex 的 CUMOB 配置和 `auth.json`，优先调用 Node.js / Python，必要时才使用内置 PowerShell 后备脚本。
 
 ## 开发与验证
 
@@ -296,7 +370,9 @@ cumob-codex-oneclick-installer/
 ├── install.ps1
 ├── payload/
 │   ├── cumob-config.template.toml
-│   └── cumob-models.json
+│   ├── cumob-models.json
+│   ├── generate-image.ps1
+│   └── generate-image-windows.cmd
 ├── scripts/
 ├── tests/
 ├── README.md

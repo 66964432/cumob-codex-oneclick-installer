@@ -9,7 +9,31 @@ permissions:
   contents: write
 
 jobs:
+  test-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify PowerShell image fallback
+        shell: powershell
+        run: |
+          $result = .\payload\generate-image.ps1 `
+            --base-url https://api.cumob.com/v1 `
+            --image-api images `
+            --image-model gpt-image-2-ref `
+            --prompt "Release configuration check" `
+            --out "$env:TEMP\cumob-release-unused.png" `
+            --dry-run `
+            --no-progress | ConvertFrom-Json
+          if ($result.endpoint -ne "https://api.cumob.com/v1/images/generations") { throw "Unexpected image endpoint" }
+          if ($result.image_model -ne "gpt-image-2-ref") { throw "Unexpected image model" }
+
+      - name: Run Windows installer tests
+        shell: pwsh
+        run: .\tests\test-install.ps1
+
   release:
+    needs: test-windows
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

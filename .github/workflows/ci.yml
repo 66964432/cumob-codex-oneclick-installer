@@ -17,6 +17,38 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Verify Windows PowerShell 5.1 compatibility
+        shell: powershell
+        run: .\install.ps1 -DryRun
+      - name: Verify PowerShell image fallback
+        shell: powershell
+        run: |
+          $result = .\payload\generate-image.ps1 `
+            --base-url https://api.cumob.com/v1 `
+            --image-api images `
+            --image-model gpt-image-2-ref `
+            --prompt "CI configuration check" `
+            --out "$env:TEMP\cumob-ci-unused.png" `
+            --dry-run `
+            --no-progress | ConvertFrom-Json
+          if ($result.endpoint -ne "https://api.cumob.com/v1/images/generations") { throw "Unexpected image endpoint" }
+          if ($result.image_model -ne "gpt-image-2-ref") { throw "Unexpected image model" }
+          $cn = .\payload\generate-image.ps1 `
+            --base-url https://api.cumob.cn/v1 `
+            --image-api images `
+            --image-model gpt-image-2-ref `
+            --prompt "CI CN endpoint check" `
+            --out "$env:TEMP\cumob-ci-unused-cn.png" `
+            --dry-run `
+            --no-progress | ConvertFrom-Json
+          if ($cn.endpoint -ne "https://api.cumob.cn/v1/images/generations") { throw "Unexpected CN image endpoint" }
+      - name: Verify launcher propagates PowerShell failures
+        shell: cmd
+        run: |
+          call install-windows.cmd -InvalidParameter <nul
+          if errorlevel 1 exit /b 0
+          echo Launcher returned success after PowerShell failed.
+          exit /b 1
       - name: Run installer tests
         shell: pwsh
         run: .\tests\test-install.ps1

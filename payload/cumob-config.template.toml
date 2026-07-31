@@ -13,4 +13,5 @@ wire_api = "responses"
 image_api = "images"
 image_model = "gpt-image-2-ref"
 requires_openai_auth = true
-base_url = "https://api.cumob.com/v1"
+# Both api.cumob.com and api.cumob.cn are valid CUMOB endpoints.
+base_url = "{{CUMOB_BASE_URL}}"

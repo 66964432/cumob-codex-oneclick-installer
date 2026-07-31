@@ -32,6 +32,110 @@ cleanup() {
 }
 trap cleanup EXIT
 
+
+normalize_cumob_base_url() {
+  local value="${1:-}"
+  value="$(printf '%s' "$value" | sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//; s|/*$||')"
+  if [ -z "$value" ]; then
+    return 1
+  fi
+  case "$value" in
+    http://api.cumob.com|https://api.cumob.com|http://api.cumob.cn|https://api.cumob.cn|\
+    http://api.cumob.com/v1|https://api.cumob.com/v1|http://api.cumob.cn/v1|https://api.cumob.cn/v1)
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+  case "$value" in
+    */v1) printf '%s\n' "$value" ;;
+    *) printf '%s/v1\n' "$value" ;;
+  esac
+}
+
+get_existing_cumob_base_url() {
+  local config_path="${1:-}"
+  local existing
+
+  if [ -z "$config_path" ] || [ ! -f "$config_path" ]; then
+    return 1
+  fi
+
+  existing="$(
+    sed -nE 's/^[[:space:]]*base_url[[:space:]]*=[[:space:]]*"(https?:\/\/api\.cumob\.(com|cn)(\/v1)?)"[[:space:]]*(#.*)?$/\1/p' \
+      "$config_path" | head -n 1
+  )"
+  normalize_cumob_base_url "$existing"
+}
+
+read_cumob_base_url_choice() {
+  local timeout_seconds="${1:-15}"
+  local default_url="${2:-https://api.cumob.com/v1}"
+  local cn_url="https://api.cumob.cn/v1"
+  local choice=""
+
+  default_url="$(normalize_cumob_base_url "$default_url" || printf '%s\n' "https://api.cumob.com/v1")"
+
+  printf '%s\n' \
+    "" \
+    "Select CUMOB API endpoint:" \
+    "  1) $default_url  (default)" \
+    "  2) $cn_url" \
+    "Press 1 or 2 within ${timeout_seconds}s. Empty input or timeout keeps the default." >&2
+
+  if [ -t 0 ]; then
+    if IFS= read -r -t "$timeout_seconds" choice; then
+      :
+    else
+      choice=""
+    fi
+  fi
+
+  case "$(printf '%s' "$choice" | tr -d '[:space:]')" in
+    2)
+      printf '%s\n' "Selected: $cn_url" >&2
+      printf '%s\n' "$cn_url"
+      ;;
+    1|"")
+      if [ -z "$(printf '%s' "$choice" | tr -d '[:space:]')" ]; then
+        printf '%s\n' "No selection within ${timeout_seconds}s. Using default: $default_url" >&2
+      else
+        printf '%s\n' "Selected: $default_url" >&2
+      fi
+      printf '%s\n' "$default_url"
+      ;;
+    *)
+      printf '%s\n' "Unrecognized input. Using default: $default_url" >&2
+      printf '%s\n' "$default_url"
+      ;;
+  esac
+}
+
+resolve_cumob_base_url() {
+  local config_path="${1:-}"
+  local no_prompt="${2:-0}"
+  local default_url="https://api.cumob.com/v1"
+  local from_env existing
+
+  if from_env="$(normalize_cumob_base_url "${CUMOB_BASE_URL:-}")"; then
+    printf '%s\n' "Using CUMOB_BASE_URL: $from_env" >&2
+    printf '%s\n' "$from_env"
+    return 0
+  fi
+
+  if existing="$(get_existing_cumob_base_url "$config_path")"; then
+    printf '%s\n' "Existing CUMOB endpoint in config.toml: $existing" >&2
+  fi
+
+  if [ "$no_prompt" -eq 1 ] || [ ! -t 0 ]; then
+    printf '%s\n' "Using default CUMOB endpoint: $default_url" >&2
+    printf '%s\n' "$default_url"
+    return 0
+  fi
+
+  read_cumob_base_url_choice 15 "$default_url"
+}
+
 usage() {
   printf '%s\n' \
     "Usage: ./install.sh [--dry-run] [--no-prompt]" \
@@ -44,7 +148,8 @@ usage() {
     "  CUMOB_SKILL_SOURCE_DIR      Use a local unpacked Skill directory." \
     "  CUMOB_INSTALLER_URL         Override installer archive URL used by bootstrap." \
     "  CUMOB_MODELS_URL            Override remote model catalog URL." \
-    "  CUMOB_CONFIG_TEMPLATE_URL   Override remote config template URL."
+    "  CUMOB_CONFIG_TEMPLATE_URL   Override remote config template URL." \
+    "  CUMOB_BASE_URL              Skip the prompt and force https://api.cumob.com/v1 or https://api.cumob.cn/v1."
 }
 
 while [ "$#" -gt 0 ]; do
@@ -224,6 +329,8 @@ if [ -z "$api_key" ] && [ "$NO_PROMPT" -eq 0 ] && [ -t 0 ]; then
   printf '\n'
 fi
 
+cumob_base_url="$(resolve_cumob_base_url "$CONFIG_PATH" "$NO_PROMPT")"
+
 timestamp="$(date '+%Y%m%d-%H%M%S')"
 backup_dir="$CODEX_HOME/backups/cumob-installer-$timestamp"
 if [ -e "$backup_dir" ]; then
@@ -267,6 +374,7 @@ if [ -f "$TEMPLATE_SOURCE" ]; then
   managed_block="$(
     sed \
       -e "s|{{MODEL_CATALOG_PATH}}|$catalog_toml_path|g" \
+      -e "s|{{CUMOB_BASE_URL}}|$cumob_base_url|g" \
       "$TEMPLATE_SOURCE"
   )"
 else
@@ -284,7 +392,7 @@ else
       'image_api = "images"' \
       'image_model = "gpt-image-2-ref"' \
       'requires_openai_auth = true' \
-      'base_url = "https://api.cumob.com/v1"'
+      "base_url = \"$cumob_base_url\""
   )"
 fi
 
@@ -341,5 +449,6 @@ printf '%s\n' \
   "Skill: $SKILL_TARGET (downloaded version: $skill_version)" \
   "Model catalog: $CATALOG_TARGET" \
   "Config: $CONFIG_PATH" \
+  "CUMOB endpoint: $cumob_base_url" \
   "$runtime_message" \
   "Restart Codex or create a new task to reload the skill and model catalog."

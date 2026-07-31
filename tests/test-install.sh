@@ -121,4 +121,43 @@ if (!output.includes('"has_api_key": true')) throw new Error("API key was not de
 if (output.includes("test-key-two")) throw new Error("dry-run leaked the API key");
 NODE
 fi
+
+# No-prompt installs use the default .com endpoint even if config previously used .cn.
+python3 - "$CODEX_HOME" <<'NODE'
+from pathlib import Path
+import sys
+config = Path(sys.argv[1]) / "config.toml"
+text = config.read_text()
+text = text.replace('base_url = "https://api.cumob.com/v1"', 'base_url = "https://api.cumob.cn/v1"')
+config.write_text(text)
+NODE
+bash "$ROOT_DIR/install.sh" --no-prompt >/dev/null
+python3 - "$CODEX_HOME" <<'NODE'
+from pathlib import Path
+import sys
+config = (Path(sys.argv[1]) / "config.toml").read_text()
+if 'base_url = "https://api.cumob.com/v1"' not in config:
+    raise SystemExit('no-prompt reinstall did not fall back to the default api.cumob.com endpoint')
+NODE
+
+# CUMOB_BASE_URL override selects .cn and skips the prompt.
+CUMOB_BASE_URL="https://api.cumob.cn/v1" bash "$ROOT_DIR/install.sh" --no-prompt >/dev/null
+python3 - "$CODEX_HOME" <<'NODE'
+from pathlib import Path
+import sys
+config = (Path(sys.argv[1]) / "config.toml").read_text()
+if 'base_url = "https://api.cumob.cn/v1"' not in config:
+    raise SystemExit('CUMOB_BASE_URL override did not select api.cumob.cn')
+NODE
+
+# CUMOB_BASE_URL override can also force .com again.
+CUMOB_BASE_URL="https://api.cumob.com/v1" bash "$ROOT_DIR/install.sh" --no-prompt >/dev/null
+python3 - "$CODEX_HOME" <<'NODE'
+from pathlib import Path
+import sys
+config = (Path(sys.argv[1]) / "config.toml").read_text()
+if 'base_url = "https://api.cumob.com/v1"' not in config:
+    raise SystemExit('CUMOB_BASE_URL override was ignored')
+NODE
+
 printf '%s\n' "macOS/Linux installer integration test passed."

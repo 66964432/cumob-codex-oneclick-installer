@@ -28,7 +28,37 @@ After installation, it automatically:
 
 1. Codex is already installed: [Codex](https://chatgpt.com/codex)
 2. The machine can access GitHub
-3. You have a CUMOB API Key ready
+3. You have a CUMOB API Key ready (see “How to Get a CUMOB API Key” below)
+
+## How to Get a CUMOB API Key
+
+This installer does not ship any API key. Create one yourself after signing in to the CUMOB platform at https://api.cumob.com.
+
+### Platform and Domains
+
+| Purpose | Domain |
+| --- | --- |
+| Platform entry (create keys, manage account) | [https://api.cumob.com](https://api.cumob.com) |
+| API endpoint (International) | `https://api.cumob.com/v1` |
+| API endpoint (Asia) | `https://api.cumob.cn/v1` |
+
+Notes:
+
+- For user access and key management, open: https://api.cumob.com
+- The installer’s `base_url` should use the API endpoint: `https://api.cumob.com/v1` or `https://api.cumob.cn/v1`
+- Platform access and Codex requests both use CUMOB domains; choose the `.com` / `.cn` route during install as needed
+
+### Recommended steps
+
+1. Open the [CUMOB platform](https://api.cumob.com)
+2. Sign up, or log in with an existing account
+3. Create / copy an API Key in the API Key page
+4. Return to this installer and paste the key when prompted
+5. If you need a different route, choose during install:
+   - `1` → `https://api.cumob.com/v1` (default)
+   - `2` → `https://api.cumob.cn/v1`
+
+If the console labels differ slightly from the wording above, follow the UI on the platform. As long as you can create and copy an API Key, you are ready.
 
 ## One-Click Install (Recommended)
 
@@ -92,9 +122,11 @@ cd cumob-codex-oneclick-installer
 Default install location:
 
 - Prefer the `CODEX_HOME` environment variable
+- On Windows image generation, also infer Codex home from the installed skill path
 - Otherwise:
   - macOS: `~/.codex`
   - Windows: `%USERPROFILE%\.codex`
+- If a restricted shell still cannot resolve it, pass an absolute `--codex-home`
 
 Files written:
 
@@ -161,6 +193,14 @@ requires_openai_auth = true
 base_url = "https://api.cumob.com/v1"
 ```
 
+`base_url` accepts both `https://api.cumob.com/v1` and `https://api.cumob.cn/v1`.
+
+- Interactive install prompt: `1 = https://api.cumob.com/v1` (default), `2 = https://api.cumob.cn/v1`
+- No selection within 15 seconds automatically keeps the default `.com`
+- `--no-prompt` / non-interactive installs use the default `.com`
+- Force and skip the prompt with `CUMOB_BASE_URL=https://api.cumob.cn/v1`
+- Image scripts always follow the Codex provider `base_url` and never hardcode one domain
+
 ## Security
 
 - Release packages and the repository never include real API keys
@@ -213,6 +253,19 @@ export CUMOB_MODELS_URL="https://raw.githubusercontent.com/66964432/cumob-codex-
 bash install.sh
 ```
 
+Windows image runtime controls:
+
+```powershell
+# Skip automatic Node.js install and keep only the PowerShell fallback
+$env:CUMOB_SKIP_NODE_INSTALL = "1"
+.\install.ps1 -NoPrompt
+
+# Custom Node install directory / download source
+$env:CUMOB_NODE_INSTALL_DIR = "$env:LOCALAPPDATA\my-cumob-node"
+$env:CUMOB_NODE_DIST_URL = "https://nodejs.org/dist/v22.14.0/node-v22.14.0-win-x64.zip"
+.\install.ps1 -NoPrompt
+```
+
 ## FAQ
 
 ### 1. Install fails with a network error
@@ -235,11 +288,16 @@ Try:
 2. Or create a new task
 3. Then re-check the model list and Skill
 
-### 3. What if I entered the wrong API Key?
+### 3. Where do I get an API Key?
+
+Open the CUMOB platform: https://api.cumob.com  
+Sign in, create / copy an API Key, then run the installer and paste it. See “How to Get a CUMOB API Key” above for details.
+
+### 4. What if I entered the wrong API Key?
 
 Run the install entry again and type the correct key.
 
-### 4. Will this overwrite my existing Codex config?
+### 5. Will this overwrite my existing Codex config?
 
 No full overwrite. The installer only:
 
@@ -256,9 +314,25 @@ Backup directories:
 
 - Codex installed
 - Network access to GitHub
-- At least one runtime for the image Skill:
-  - Node.js 18+
-  - Python 3
+- The image Skill prefers Node.js 18+ or Python 3
+- The Windows installer detects image runtimes automatically:
+  - Reuses an existing Node.js 18+ or Python 3 installation
+  - If neither is present, downloads Node.js LTS from nodejs.org into `%LOCALAPPDATA%\cumob-nodejs` and adds it to the current process PATH and the user PATH
+  - Skip automatic install with `CUMOB_SKIP_NODE_INSTALL=1`
+  - Optional overrides: `CUMOB_NODE_DIST_URL`, `CUMOB_NODE_INDEX_URL`, `CUMOB_NODE_INSTALL_DIR`
+- Windows still keeps a PowerShell 5.1 fallback for emergency use when Node/Python are unavailable
+- The image Skill on macOS / Linux still requires Node.js 18+ or Python 3
+
+The Windows installation adds a unified launcher to the Skill:
+
+```powershell
+& "$env:USERPROFILE\.codex\skills\cumob-image-generation4codex\scripts\generate-image-windows.cmd" `
+  --prompt "A quick test image" `
+  --out "$env:TEMP\cumob-test.png" `
+  --dry-run
+```
+
+The launcher reads the Codex CUMOB configuration and `auth.json` automatically, prefers Node.js / Python, and only uses the built-in PowerShell fallback when needed.
 
 ## Development And Verification
 
@@ -296,7 +370,9 @@ cumob-codex-oneclick-installer/
 ├── install.ps1
 ├── payload/
 │   ├── cumob-config.template.toml
-│   └── cumob-models.json
+│   ├── cumob-models.json
+│   ├── generate-image.ps1
+│   └── generate-image-windows.cmd
 ├── scripts/
 ├── tests/
 ├── README.md
