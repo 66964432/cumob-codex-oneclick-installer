@@ -10,7 +10,7 @@ try {
     $fixtureSkill = Join-Path $testRoot "fixture-skill"
     $fixtureScripts = Join-Path $fixtureSkill "scripts"
     New-Item -ItemType Directory -Force -Path $fixtureScripts | Out-Null
-    [IO.File]::WriteAllText((Join-Path $fixtureSkill "SKILL.md"), "---`nname: cumob-image-generation4codex`ndescription: Installer test fixture.`n---`n")
+    [IO.File]::WriteAllText((Join-Path $fixtureSkill "SKILL.md"), "---`nname: cumob-media-generation4codex`ndescription: Installer test fixture.`n---`n")
     [IO.File]::WriteAllText((Join-Path $fixtureSkill "VERSION"), "test-fixture`n")
     [IO.File]::WriteAllText((Join-Path $fixtureScripts "generate-image.py"), "print('test fixture')`n")
     $env:CUMOB_SKILL_SOURCE_DIR = $fixtureSkill
@@ -86,17 +86,24 @@ localeOverride = "zh-CN"
 
     $configPath = Join-Path $env:CODEX_HOME "config.toml"
     $authPath = Join-Path $env:CODEX_HOME "auth.json"
-    $installedSkill = Join-Path $env:CODEX_HOME "skills\cumob-image-generation4codex"
+    $installedSkill = Join-Path $env:CODEX_HOME "skills\cumob-media-generation4codex"
     $powerShellFallback = Join-Path $installedSkill "scripts\generate-image.ps1"
     $windowsImageLauncher = Join-Path $installedSkill "scripts\generate-image-windows.cmd"
     $config = [IO.File]::ReadAllText($configPath)
     $auth = [IO.File]::ReadAllText($authPath) | ConvertFrom-Json
     $catalog = [IO.File]::ReadAllText((Join-Path $env:CODEX_HOME "model-catalogs\cumob-models.json")) | ConvertFrom-Json
 
+    if (Test-Path -LiteralPath $oldSkill) { throw "legacy Skill directory was not removed" }
+    $legacyBackup = Get-ChildItem -LiteralPath (Join-Path $env:CODEX_HOME "backups") -Directory |
+        Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName "cumob-image-generation4codex\OLD.txt") } |
+        Select-Object -First 1
+    if ($null -eq $legacyBackup) { throw "legacy Skill directory was not backed up" }
     if ([regex]::Matches($config, "(?m)^model_provider\s*=").Count -ne 1) { throw "model_provider is not unique" }
     if ([regex]::Matches($config, "(?m)^\[model_providers\.cumob\]$").Count -ne 1) { throw "CUMOB table is not unique" }
     if (-not $config.Contains("[model_providers.other]")) { throw "other provider was removed" }
     if (-not $config.Contains('localeOverride = "zh-CN"')) { throw "desktop settings were removed" }
+    if (-not $config.Contains('video_api = "videos"')) { throw "video_api was not installed" }
+    if (-not $config.Contains('video_model = "minimax-h3-ref"')) { throw "video model was not installed" }
     if ($auth.OPENAI_API_KEY -ne "test-key-one" -or $auth.OTHER_AUTH_FIELD -ne "keep-me") { throw "auth.json merge failed" }
     if ($null -eq $catalog.models -or $catalog.models.Count -ne 10) { throw "model catalog was not installed" }
     if (-not (Test-Path -LiteralPath $powerShellFallback -PathType Leaf)) { throw "PowerShell image fallback was not installed" }
@@ -135,7 +142,7 @@ localeOverride = "zh-CN"
     if (-not $fallbackDryRun.has_api_key) { throw "PowerShell fallback did not detect the API key" }
     if ($fallbackDryRunText.Contains("test-key-one")) { throw "PowerShell fallback dry-run leaked the API key" }
 
-    $nestedSkillScripts = Join-Path $env:CODEX_HOME "skills\cumob-image-generation4codex\scripts"
+    $nestedSkillScripts = Join-Path $env:CODEX_HOME "skills\cumob-media-generation4codex\scripts"
     $nestedFallback = Join-Path $nestedSkillScripts "generate-image.ps1"
     $nestedLauncher = Join-Path $nestedSkillScripts "generate-image-windows.cmd"
     if (-not (Test-Path -LiteralPath $nestedFallback -PathType Leaf)) {

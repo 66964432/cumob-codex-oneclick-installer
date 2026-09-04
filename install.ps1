@@ -10,7 +10,7 @@ Set-StrictMode -Version 2.0
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $payloadDir = Join-Path $scriptDir "payload"
 $defaultInstallerArchiveUrl = "https://github.com/66964432/cumob-codex-oneclick-installer/archive/refs/heads/main.zip"
-$defaultSkillArchiveUrl = "https://github.com/66964432/cumob-image-generation4codex/archive/refs/heads/main.zip"
+$defaultSkillArchiveUrl = "https://github.com/66964432/cumob-media-generation4codex/archive/refs/heads/main.zip"
 $defaultModelsUrl = "https://raw.githubusercontent.com/66964432/cumob-codex-oneclick-installer/main/payload/cumob-models.json"
 $defaultTemplateUrl = "https://raw.githubusercontent.com/66964432/cumob-codex-oneclick-installer/main/payload/cumob-config.template.toml"
 $defaultPowerShellFallbackUrl = "https://raw.githubusercontent.com/66964432/cumob-codex-oneclick-installer/main/payload/generate-image.ps1"
@@ -598,7 +598,8 @@ $codexHome = if ($env:CODEX_HOME) {
 }
 
 $skillsDir = Join-Path $codexHome "skills"
-$skillTarget = Join-Path $skillsDir "cumob-image-generation4codex"
+$skillTarget = Join-Path $skillsDir "cumob-media-generation4codex"
+$legacySkillTarget = Join-Path $skillsDir "cumob-image-generation4codex"
 $catalogDir = Join-Path $codexHome "model-catalogs"
 $catalogTarget = Join-Path $catalogDir "cumob-models.json"
 $configPath = Join-Path $codexHome "config.toml"
@@ -637,7 +638,7 @@ try {
         if ([string]::IsNullOrWhiteSpace($downloadRoot)) {
             $downloadRoot = Join-Path ([IO.Path]::GetTempPath()) ("cumob-skill-download-" + [Guid]::NewGuid().ToString("N"))
         }
-        $skillArchive = Join-Path $downloadRoot "cumob-image-generation4codex.zip"
+        $skillArchive = Join-Path $downloadRoot "cumob-media-generation4codex.zip"
         $skillExtractDir = Join-Path $downloadRoot "skill-extracted"
         New-Item -ItemType Directory -Force -Path $skillExtractDir | Out-Null
 
@@ -724,11 +725,16 @@ try {
     }
     if (Test-Path -LiteralPath $skillTarget -PathType Container) {
         Copy-Item -LiteralPath $skillTarget `
+            -Destination (Join-Path $backupDir "cumob-media-generation4codex") `
+            -Recurse
+    }
+    if (Test-Path -LiteralPath $legacySkillTarget -PathType Container) {
+        Copy-Item -LiteralPath $legacySkillTarget `
             -Destination (Join-Path $backupDir "cumob-image-generation4codex") `
             -Recurse
     }
 
-    $tempSkill = Join-Path $skillsDir ".cumob-image-generation4codex.tmp.$PID"
+    $tempSkill = Join-Path $skillsDir ".cumob-media-generation4codex.tmp.$PID"
     if (Test-Path -LiteralPath $tempSkill) {
         Remove-Item -LiteralPath $tempSkill -Recurse -Force
     }
@@ -741,6 +747,9 @@ try {
         Remove-Item -LiteralPath $skillTarget -Recurse -Force
     }
     Move-Item -LiteralPath $tempSkill -Destination $skillTarget
+    if (Test-Path -LiteralPath $legacySkillTarget) {
+        Remove-Item -LiteralPath $legacySkillTarget -Recurse -Force
+    }
     Copy-Item -LiteralPath $catalogSource -Destination $catalogTarget -Force
 
     $filteredLines = New-Object "System.Collections.Generic.List[string]"

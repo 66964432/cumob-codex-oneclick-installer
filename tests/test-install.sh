@@ -10,7 +10,7 @@ if [ "${CUMOB_LIVE_TEST:-0}" != "1" ]; then
   mkdir -p "$fixture_skill/scripts"
   cat > "$fixture_skill/SKILL.md" <<'SKILL'
 ---
-name: cumob-image-generation4codex
+name: cumob-media-generation4codex
 description: Installer test fixture.
 ---
 SKILL
@@ -71,13 +71,21 @@ const home = process.argv[2];
 const config = fs.readFileSync(path.join(home, "config.toml"), "utf8");
 const auth = JSON.parse(fs.readFileSync(path.join(home, "auth.json"), "utf8"));
 const catalog = JSON.parse(fs.readFileSync(path.join(home, "model-catalogs", "cumob-models.json"), "utf8"));
-const version = fs.readFileSync(path.join(home, "skills", "cumob-image-generation4codex", "VERSION"), "utf8").trim();
+const version = fs.readFileSync(path.join(home, "skills", "cumob-media-generation4codex", "VERSION"), "utf8").trim();
 const expectedVersion = process.env.EXPECTED_SKILL_VERSION;
 function count(pattern) { return (config.match(pattern) || []).length; }
+if (fs.existsSync(path.join(home, "skills", "cumob-image-generation4codex"))) throw new Error("legacy Skill directory was not removed");
+const backupRoot = path.join(home, "backups");
+const legacyWasBackedUp = fs.readdirSync(backupRoot).some((entry) =>
+  fs.existsSync(path.join(backupRoot, entry, "cumob-image-generation4codex", "OLD.txt"))
+);
+if (!legacyWasBackedUp) throw new Error("legacy Skill directory was not backed up");
 if (count(/^model_provider\s*=/gm) !== 1) throw new Error("model_provider is not unique");
 if (count(/^\[model_providers\.cumob\]$/gm) !== 1) throw new Error("CUMOB table is not unique");
 if (!config.includes('[model_providers.other]')) throw new Error("other provider was removed");
 if (!config.includes('localeOverride = "zh-CN"')) throw new Error("desktop settings were removed");
+if (!config.includes('video_api = "videos"')) throw new Error("video_api was not installed");
+if (!config.includes('video_model = "minimax-h3-ref"')) throw new Error("video model was not installed");
 const catalogMatch = config.match(/^model_catalog_json\s*=\s*"([^"]+)"$/m);
 if (!catalogMatch) throw new Error("catalog path was not generated");
 const expectedCatalog = fs.realpathSync(path.join(home, "model-catalogs", "cumob-models.json"));
@@ -108,7 +116,7 @@ if (auth.OPENAI_API_KEY !== "test-key-two") throw new Error("reinstall did not u
 if (backups.length < 2) throw new Error("reinstall did not create a second backup");
 NODE
 if [ "${CUMOB_LIVE_TEST:-0}" = "1" ]; then
-  node "$CODEX_HOME/skills/cumob-image-generation4codex/scripts/generate-image.mjs" \
+  node "$CODEX_HOME/skills/cumob-media-generation4codex/scripts/generate-image.mjs" \
     --prompt "Installer configuration check" \
     --out "$TEST_ROOT/unused.png" \
     --dry-run > "$TEST_ROOT/dry-run.json"

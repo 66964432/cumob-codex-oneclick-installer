@@ -6,7 +6,7 @@ macOS / Windows 双击安装，把 Codex 一键接入 CUMOB 自定义路由。
 
 安装后自动完成：
 
-1. 安装最新 `cumob-image-generation4codex` Skill
+1. 安装最新 `cumob-media-generation4codex` Skill
 2. 写入 CUMOB provider 配置
 3. 安装自定义模型目录 `cumob-models.json`
 4. 将 CUMOB API Key 合并进 Codex `auth.json`
@@ -21,7 +21,7 @@ macOS / Windows 双击安装，把 Codex 一键接入 CUMOB 自定义路由。
 ## 仓库
 
 - 安装器：[`66964432/cumob-codex-oneclick-installer`](https://github.com/66964432/cumob-codex-oneclick-installer)
-- Skill：[`66964432/cumob-image-generation4codex`](https://github.com/66964432/cumob-image-generation4codex)
+- Skill：[`66964432/cumob-media-generation4codex`](https://github.com/66964432/cumob-media-generation4codex)
 - 最新发布页：https://github.com/66964432/cumob-codex-oneclick-installer/releases/latest
 
 ## 安装前准备
@@ -137,14 +137,14 @@ cd cumob-codex-oneclick-installer
 ├── model-catalogs/
 │   └── cumob-models.json
 ├── skills/
-│   └── cumob-image-generation4codex/
+│   └── cumob-media-generation4codex/
 └── backups/
     └── cumob-installer-YYYYMMDD-HHMMSS/
 ```
 
 安装器会自动配置：
 
-- 最新 `cumob-image-generation4codex` Skill
+- 最新 `cumob-media-generation4codex` Skill
 - CUMOB 模型目录
 - CUMOB provider 配置
 - API Key 到 Codex `auth.json`
@@ -154,7 +154,7 @@ cd cumob-codex-oneclick-installer
 打开 Codex 后检查：
 
 1. 模型列表里能看到 CUMOB 模型，例如 `gpt-5.6-sol`
-2. 可以调用图片 Skill：`cumob-image-generation4codex`
+2. 可以调用媒体 Skill：`cumob-media-generation4codex`
 3. 生成图片时不再提示缺少 API Key / provider
 
 ## 升级
@@ -171,6 +171,7 @@ cd cumob-codex-oneclick-installer
 安装器不会整文件覆盖 `config.toml`。它会：
 
 - 先备份旧配置、旧 auth、旧模型目录、旧 Skill
+- 升级时备份并移除旧名称 `cumob-image-generation4codex`，避免两个 Skill 并存
 - 删除旧的 CUMOB provider 段和本安装器受管段
 - 写入可移植 CUMOB 配置，并生成当前机器上的模型目录绝对路径
 - 保留其他 provider / MCP / 插件 / 桌面设置 / 项目权限
@@ -189,6 +190,8 @@ name = "cumob"
 wire_api = "responses"
 image_api = "images"
 image_model = "gpt-image-2-ref"
+video_api = "videos"
+video_model = "minimax-h3-ref"
 requires_openai_auth = true
 base_url = "https://api.cumob.com/v1"
 ```
@@ -248,7 +251,7 @@ $env:CODEX_HOME = "D:\CodexHome"
 
 ```bash
 export CUMOB_INSTALLER_URL="https://github.com/66964432/cumob-codex-oneclick-installer/archive/refs/heads/main.zip"
-export CUMOB_SKILL_URL="https://github.com/66964432/cumob-image-generation4codex/archive/refs/heads/main.zip"
+export CUMOB_SKILL_URL="https://github.com/66964432/cumob-media-generation4codex/archive/refs/heads/main.zip"
 export CUMOB_MODELS_URL="https://raw.githubusercontent.com/66964432/cumob-codex-oneclick-installer/main/payload/cumob-models.json"
 bash install.sh
 ```
@@ -276,7 +279,7 @@ $env:CUMOB_NODE_DIST_URL = "https://nodejs.org/dist/v22.14.0/node-v22.14.0-win-x
 - 没有被公司代理 / 防火墙拦截
 - 可访问：
   - `https://github.com/66964432/cumob-codex-oneclick-installer`
-  - `https://github.com/66964432/cumob-image-generation4codex`
+  - `https://github.com/66964432/cumob-media-generation4codex`
 
 然后重新双击安装。
 
@@ -326,7 +329,7 @@ $env:CUMOB_NODE_DIST_URL = "https://nodejs.org/dist/v22.14.0/node-v22.14.0-win-x
 Windows 安装后，Skill 中会增加统一启动器：
 
 ```powershell
-& "$env:USERPROFILE\.codex\skills\cumob-image-generation4codex\scripts\generate-image-windows.cmd" `
+& "$env:USERPROFILE\.codex\skills\cumob-media-generation4codex\scripts\generate-image-windows.cmd" `
   --prompt "A quick test image" `
   --out "$env:TEMP\cumob-test.png" `
   --dry-run
