@@ -386,7 +386,7 @@ else
   managed_block="$(
     printf '%s\n' \
       'model_provider = "cumob"' \
-      'model = "gpt-5.6-sol"' \
+      'model = "gpt-6-astra"' \
       'disable_response_storage = true' \
       "model_catalog_json = \"$catalog_toml_path\"" \
       'model_reasoning_effort = "high"' \
@@ -395,7 +395,7 @@ else
       'name = "cumob"' \
       'wire_api = "responses"' \
       'image_api = "images"' \
-      'image_model = "gpt-image-2-ref"' \
+      'image_model = "gpt-image-2.5-ref"' \
       'video_api = "videos"' \
       'video_model = "minimax-h3-ref"' \
       'requires_openai_auth = true' \

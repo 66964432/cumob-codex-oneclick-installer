@@ -181,7 +181,7 @@ Managed defaults:
 
 ```toml
 model_provider = "cumob"
-model = "gpt-5.6-sol"
+model = "gpt-6-astra"
 disable_response_storage = true
 model_reasoning_effort = "high"
 
@@ -189,7 +189,7 @@ model_reasoning_effort = "high"
 name = "cumob"
 wire_api = "responses"
 image_api = "images"
-image_model = "gpt-image-2-ref"
+image_model = "gpt-image-2.5-ref"
 video_api = "videos"
 video_model = "minimax-h3-ref"
 requires_openai_auth = true

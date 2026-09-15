@@ -124,7 +124,7 @@ if [ "${CUMOB_LIVE_TEST:-0}" = "1" ]; then
 const fs = require("fs");
 const output = fs.readFileSync(process.argv[2], "utf8");
 if (!output.includes('"image_api": "images"')) throw new Error("image_api was not loaded");
-if (!output.includes('"image_model": "gpt-image-2-ref"')) throw new Error("image model was not loaded");
+if (!output.includes('"image_model": "gpt-image-2.5-ref"')) throw new Error("image model was not loaded");
 if (!output.includes('"has_api_key": true')) throw new Error("API key was not detected");
 if (output.includes("test-key-two")) throw new Error("dry-run leaked the API key");
 NODE

@@ -138,7 +138,7 @@ localeOverride = "zh-CN"
     $fallbackDryRun = $fallbackDryRunText | ConvertFrom-Json
     if ($fallbackDryRun.image_api -ne "images") { throw "PowerShell fallback did not load image_api" }
     if ($fallbackDryRun.endpoint -ne "https://api.cumob.com/v1/images/generations") { throw "PowerShell fallback endpoint is incorrect" }
-    if ($fallbackDryRun.image_model -ne "gpt-image-2-ref") { throw "PowerShell fallback image model is incorrect" }
+    if ($fallbackDryRun.image_model -ne "gpt-image-2.5-ref") { throw "PowerShell fallback image model is incorrect" }
     if (-not $fallbackDryRun.has_api_key) { throw "PowerShell fallback did not detect the API key" }
     if ($fallbackDryRunText.Contains("test-key-one")) { throw "PowerShell fallback dry-run leaked the API key" }
 
@@ -170,7 +170,7 @@ localeOverride = "zh-CN"
         if ($inferredDryRun.codex_home -ne ([IO.Path]::GetFullPath($savedCodexHome))) {
             throw "PowerShell fallback did not infer Codex home from the installed skill path"
         }
-        if ($inferredDryRun.image_model -ne "gpt-image-2-ref") {
+        if ($inferredDryRun.image_model -ne "gpt-image-2.5-ref") {
             throw "Skill-path home inference loaded the wrong image model"
         }
 
@@ -220,7 +220,7 @@ localeOverride = "zh-CN"
         --no-progress | Out-String)
     if ($LASTEXITCODE -ne 0) { throw "Windows image launcher PowerShell fallback failed with exit code $LASTEXITCODE" }
     $launcherDryRun = $launcherDryRunText | ConvertFrom-Json
-    if ($launcherDryRun.image_model -ne "gpt-image-2-ref") { throw "Windows image launcher selected the wrong model" }
+    if ($launcherDryRun.image_model -ne "gpt-image-2.5-ref") { throw "Windows image launcher selected the wrong model" }
     Remove-Item Env:CUMOB_IMAGE_FORCE_POWERSHELL
 
     # No-prompt installs use the default .com endpoint even if config previously used .cn.
