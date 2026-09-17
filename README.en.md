@@ -191,7 +191,7 @@ wire_api = "responses"
 image_api = "images"
 image_model = "gpt-image-2.5-ref"
 video_api = "videos"
-video_model = "minimax-h3-ref"
+video_model = "minimax-h3-2k-ref"
 requires_openai_auth = true
 base_url = "https://api.cumob.com/v1"
 ```

@@ -92,6 +92,7 @@ localeOverride = "zh-CN"
     $config = [IO.File]::ReadAllText($configPath)
     $auth = [IO.File]::ReadAllText($authPath) | ConvertFrom-Json
     $catalog = [IO.File]::ReadAllText((Join-Path $env:CODEX_HOME "model-catalogs\cumob-models.json")) | ConvertFrom-Json
+    $sourceCatalog = [IO.File]::ReadAllText((Join-Path $rootDir "payload\cumob-models.json")) | ConvertFrom-Json
 
     if (Test-Path -LiteralPath $oldSkill) { throw "legacy Skill directory was not removed" }
     $legacyBackup = Get-ChildItem -LiteralPath (Join-Path $env:CODEX_HOME "backups") -Directory |
@@ -103,9 +104,9 @@ localeOverride = "zh-CN"
     if (-not $config.Contains("[model_providers.other]")) { throw "other provider was removed" }
     if (-not $config.Contains('localeOverride = "zh-CN"')) { throw "desktop settings were removed" }
     if (-not $config.Contains('video_api = "videos"')) { throw "video_api was not installed" }
-    if (-not $config.Contains('video_model = "minimax-h3-ref"')) { throw "video model was not installed" }
+    if (-not $config.Contains('video_model = "minimax-h3-2k-ref"')) { throw "video model was not installed" }
     if ($auth.OPENAI_API_KEY -ne "test-key-one" -or $auth.OTHER_AUTH_FIELD -ne "keep-me") { throw "auth.json merge failed" }
-    if ($null -eq $catalog.models -or $catalog.models.Count -ne 10) { throw "model catalog was not installed" }
+    if ($null -eq $catalog.models -or $catalog.models.Count -ne $sourceCatalog.models.Count) { throw "model catalog was not installed" }
     if (-not (Test-Path -LiteralPath $powerShellFallback -PathType Leaf)) { throw "PowerShell image fallback was not installed" }
     if (-not (Test-Path -LiteralPath $windowsImageLauncher -PathType Leaf)) { throw "Windows image launcher was not installed" }
     $installedSkillInstructions = [IO.File]::ReadAllText((Join-Path $installedSkill "SKILL.md"))

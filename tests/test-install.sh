@@ -64,10 +64,11 @@ cat > "$CODEX_HOME/auth.json" <<'AUTH'
 AUTH
 export CUMOB_INSTALL_API_KEY="test-key-one"
 bash "$ROOT_DIR/install.sh" --no-prompt >/dev/null
-node - "$CODEX_HOME" <<'NODE'
+node - "$CODEX_HOME" "$ROOT_DIR/payload/cumob-models.json" <<'NODE'
 const fs = require("fs");
 const path = require("path");
 const home = process.argv[2];
+const sourceCatalog = JSON.parse(fs.readFileSync(process.argv[3], "utf8"));
 const config = fs.readFileSync(path.join(home, "config.toml"), "utf8");
 const auth = JSON.parse(fs.readFileSync(path.join(home, "auth.json"), "utf8"));
 const catalog = JSON.parse(fs.readFileSync(path.join(home, "model-catalogs", "cumob-models.json"), "utf8"));
@@ -85,7 +86,7 @@ if (count(/^\[model_providers\.cumob\]$/gm) !== 1) throw new Error("CUMOB table 
 if (!config.includes('[model_providers.other]')) throw new Error("other provider was removed");
 if (!config.includes('localeOverride = "zh-CN"')) throw new Error("desktop settings were removed");
 if (!config.includes('video_api = "videos"')) throw new Error("video_api was not installed");
-if (!config.includes('video_model = "minimax-h3-ref"')) throw new Error("video model was not installed");
+if (!config.includes('video_model = "minimax-h3-2k-ref"')) throw new Error("video model was not installed");
 const catalogMatch = config.match(/^model_catalog_json\s*=\s*"([^"]+)"$/m);
 if (!catalogMatch) throw new Error("catalog path was not generated");
 const expectedCatalog = fs.realpathSync(path.join(home, "model-catalogs", "cumob-models.json"));
@@ -93,7 +94,7 @@ const configuredCatalog = fs.realpathSync(catalogMatch[1]);
 if (configuredCatalog !== expectedCatalog) throw new Error("catalog path points to the wrong file");
 if (auth.OPENAI_API_KEY !== "test-key-one") throw new Error("API key was not updated");
 if (auth.OTHER_AUTH_FIELD !== "keep-me") throw new Error("auth fields were not preserved");
-if (!Array.isArray(catalog.models) || catalog.models.length !== 10) throw new Error("model catalog was not installed");
+if (!Array.isArray(catalog.models) || catalog.models.length !== sourceCatalog.models.length) throw new Error("model catalog was not installed");
 if (!catalog.models.some((model) => model.slug === "gpt-5.6-sol")) throw new Error("expected default model is missing");
 if (expectedVersion && version !== expectedVersion) throw new Error("skill version mismatch");
 if (!version) throw new Error("installed skill version is empty");
