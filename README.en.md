@@ -1,6 +1,34 @@
 # Codex One-Click Custom Route Setup - CUMOB Edition
 
-[中文](README.md)
+[中文](README.md) | **English**
+
+> Download → double-click → enter the API key → restart Codex.
+
+Install the CUMOB provider, model catalog and the latest `cumob-media-generation4codex` Skill on macOS or Windows. Re-running the installer upgrades managed files, backs up existing files first and does not replace the user's entire Codex configuration.
+
+[Download the latest release](https://github.com/66964432/cumob-codex-oneclick-installer/releases/latest) · [View the media Skill](https://github.com/66964432/cumob-media-generation4codex) · [Review what the installer changes](#what-the-installer-changes)
+
+## What the installer changes
+
+![Installer safety overview](docs/assets/installer-safety.png)
+
+```text
+<CODEX_HOME>/
+├── auth.json          Merge the CUMOB API key
+├── config.toml        Update only managed CUMOB provider settings
+├── model-catalogs/    Install the CUMOB model catalog
+├── skills/            Install the latest media-generation Skill
+└── backups/           Back up existing files before modification
+```
+
+Security properties:
+
+- Open source and auditable.
+- Supports `--dry-run` / `-DryRun`.
+- Does not pass the API key as a command-line argument.
+- Does not write the API key to installation logs.
+- Preserves other providers, MCP servers, plugins and desktop settings.
+- Can be re-run for upgrades without creating duplicate TOML keys.
 
 One-click macOS / Windows installer that connects Codex to the CUMOB custom route.
 

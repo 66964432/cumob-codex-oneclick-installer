@@ -2,6 +2,34 @@
 
 [English](README.en.md)
 
+> 下载入口 → 双击安装 → 输入 API Key → 重启 Codex
+
+为 Codex 安装 CUMOB Provider、模型目录和最新版 `cumob-media-generation4codex` Skill。支持 macOS 和 Windows，可重复运行升级，修改前自动备份，不整份覆盖现有 Codex 配置。
+
+[下载最新版](https://github.com/66964432/cumob-codex-oneclick-installer/releases/latest) · [查看媒体 Skill](https://github.com/66964432/cumob-media-generation4codex) · [先看安装安全说明](#安装器会修改什么)
+
+## 安装器会修改什么
+
+![一键安装器安全说明](docs/assets/installer-safety.png)
+
+```text
+<CODEX_HOME>/
+├── auth.json          仅合并 CUMOB API Key
+├── config.toml        仅更新 CUMOB provider 和受管配置
+├── model-catalogs/    安装 CUMOB 模型目录
+├── skills/            安装最新媒体生成 Skill
+└── backups/           修改前自动备份旧文件
+```
+
+安全要点：
+
+- 源码公开；
+- 支持 `--dry-run` / `-DryRun`；
+- API Key 不作为命令行参数传递；
+- API Key 不写入安装日志；
+- 其他 Provider、MCP、插件和桌面设置会保留；
+- 重复运行用于升级，不产生重复 TOML 键。
+
 macOS / Windows 双击安装，把 Codex 一键接入 CUMOB 自定义路由。
 
 安装后自动完成：
