@@ -157,10 +157,31 @@ localeOverride = "zh-CN"
     $savedHomePath = $env:HOMEPATH
     try {
         Remove-Item Env:CODEX_HOME -ErrorAction SilentlyContinue
-        $env:USERPROFILE = Join-Path $testRoot "missing-profile"
+        $profileRoot = Join-Path $testRoot "profile-home"
+        $profileCodexHome = Join-Path $profileRoot ".codex"
+        New-Item -ItemType Directory -Force -Path $profileCodexHome | Out-Null
+        Copy-Item -LiteralPath (Join-Path $savedCodexHome "config.toml") -Destination (Join-Path $profileCodexHome "config.toml")
+        Copy-Item -LiteralPath (Join-Path $savedCodexHome "auth.json") -Destination (Join-Path $profileCodexHome "auth.json")
+        $env:USERPROFILE = $profileRoot
         $env:HOME = Join-Path $testRoot "missing-home"
         Remove-Item Env:HOMEDRIVE -ErrorAction SilentlyContinue
         Remove-Item Env:HOMEPATH -ErrorAction SilentlyContinue
+
+        $standaloneFallback = Join-Path $rootDir "payload\generate-image.ps1"
+        $profileDryRunText = (& $standaloneFallback `
+            --prompt "Infer Codex home from user profile" `
+            --image (Join-Path $testRoot "profile-input.png") `
+            --action edit `
+            --out (Join-Path $testRoot "unused-profile.png") `
+            --dry-run `
+            --no-progress | Out-String)
+        $profileDryRun = $profileDryRunText | ConvertFrom-Json
+        if ($profileDryRun.codex_home -ne ([IO.Path]::GetFullPath($profileCodexHome))) {
+            throw "Standalone PowerShell fallback did not infer Codex home from USERPROFILE"
+        }
+        if ($profileDryRun.request.images.Count -ne 1) {
+            throw "PowerShell fallback argument parsing lost the repeated image option"
+        }
 
         $inferredDryRunText = (& $nestedFallback `
             --prompt "Infer Codex home from skill path" `

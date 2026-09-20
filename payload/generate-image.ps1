@@ -90,7 +90,7 @@ function Parse-Arguments {
         $index++
         $value = $Values[$index]
         if ($key -eq "image") {
-            $result.image.Add($value)
+            [void]$result.image.Add($value)
         } else {
             $result[$key] = $value
         }
@@ -196,19 +196,19 @@ function Resolve-DefaultCodexHome {
     foreach ($name in @("USERPROFILE", "HOME")) {
         $value = Get-EnvironmentValue $name
         if (-not [string]::IsNullOrWhiteSpace($value)) {
-            $profileBases.Add($value)
+            [void]$profileBases.Add($value)
         }
     }
 
     $folderProfile = [Environment]::GetFolderPath("UserProfile")
     if (-not [string]::IsNullOrWhiteSpace($folderProfile)) {
-        $profileBases.Add($folderProfile)
+        [void]$profileBases.Add($folderProfile)
     }
 
     $homeDrive = Get-EnvironmentValue "HOMEDRIVE"
     $homePath = Get-EnvironmentValue "HOMEPATH"
     if (-not [string]::IsNullOrWhiteSpace($homeDrive) -and -not [string]::IsNullOrWhiteSpace($homePath)) {
-        $profileBases.Add(($homeDrive.TrimEnd("\\", "/") + $homePath))
+        [void]$profileBases.Add(($homeDrive.TrimEnd("\\", "/") + $homePath))
     }
 
     $seen = @{}
