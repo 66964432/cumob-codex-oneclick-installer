@@ -20,13 +20,13 @@ jobs:
           $result = .\payload\generate-image.ps1 `
             --base-url https://api.cumob.com/v1 `
             --image-api images `
-            --image-model gpt-image-2-ref `
+            --image-model gpt-image-2 `
             --prompt "Release configuration check" `
             --out "$env:TEMP\cumob-release-unused.png" `
             --dry-run `
             --no-progress | ConvertFrom-Json
           if ($result.endpoint -ne "https://api.cumob.com/v1/images/generations") { throw "Unexpected image endpoint" }
-          if ($result.image_model -ne "gpt-image-2-ref") { throw "Unexpected image model" }
+          if ($result.image_model -ne "gpt-image-2") { throw "Unexpected image model" }
 
       - name: Run Windows installer tests
         shell: pwsh

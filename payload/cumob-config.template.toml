@@ -11,9 +11,9 @@ model_reasoning_effort = "high"
 name = "cumob"
 wire_api = "responses"
 image_api = "images"
-image_model = "gpt-image-2.5-ref"
+image_model = "gpt-image-2.5"
 video_api = "videos"
-video_model = "minimax-h3-2k-ref"
+video_model = "minimax-h3-2k"
 requires_openai_auth = true
 # Both api.cumob.com and api.cumob.cn are valid CUMOB endpoints.
 base_url = "{{CUMOB_BASE_URL}}"

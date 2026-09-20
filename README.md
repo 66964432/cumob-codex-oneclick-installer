@@ -189,9 +189,9 @@ model_reasoning_effort = "high"
 name = "cumob"
 wire_api = "responses"
 image_api = "images"
-image_model = "gpt-image-2.5-ref"
+image_model = "gpt-image-2.5"
 video_api = "videos"
-video_model = "minimax-h3-2k-ref"
+video_model = "minimax-h3-2k"
 requires_openai_auth = true
 base_url = "https://api.cumob.com/v1"
 ```

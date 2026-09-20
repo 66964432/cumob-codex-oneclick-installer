@@ -86,7 +86,7 @@ if (count(/^\[model_providers\.cumob\]$/gm) !== 1) throw new Error("CUMOB table 
 if (!config.includes('[model_providers.other]')) throw new Error("other provider was removed");
 if (!config.includes('localeOverride = "zh-CN"')) throw new Error("desktop settings were removed");
 if (!config.includes('video_api = "videos"')) throw new Error("video_api was not installed");
-if (!config.includes('video_model = "minimax-h3-2k-ref"')) throw new Error("video model was not installed");
+if (!config.includes('video_model = "minimax-h3-2k"')) throw new Error("video model was not installed");
 const catalogMatch = config.match(/^model_catalog_json\s*=\s*"([^"]+)"$/m);
 if (!catalogMatch) throw new Error("catalog path was not generated");
 const expectedCatalog = fs.realpathSync(path.join(home, "model-catalogs", "cumob-models.json"));
@@ -125,7 +125,7 @@ if [ "${CUMOB_LIVE_TEST:-0}" = "1" ]; then
 const fs = require("fs");
 const output = fs.readFileSync(process.argv[2], "utf8");
 if (!output.includes('"image_api": "images"')) throw new Error("image_api was not loaded");
-if (!output.includes('"image_model": "gpt-image-2.5-ref"')) throw new Error("image model was not loaded");
+if (!output.includes('"image_model": "gpt-image-2.5"')) throw new Error("image model was not loaded");
 if (!output.includes('"has_api_key": true')) throw new Error("API key was not detected");
 if (output.includes("test-key-two")) throw new Error("dry-run leaked the API key");
 NODE

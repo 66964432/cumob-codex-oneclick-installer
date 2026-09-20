@@ -524,15 +524,15 @@ function Add-WindowsImageFallback {
     )
     $skillInstructions = $skillInstructions.Replace(
         'For CUMOB, configure `base_url = "https://api.cumob.com/v1"`, `image_api = "images"`, and `image_model = "gpt-image-2"`.',
-        'For CUMOB, configure `image_api = "images"` and `image_model = "gpt-image-2.5-ref"`. Use either `base_url = "https://api.cumob.com/v1"` or `base_url = "https://api.cumob.cn/v1"`; both domains are valid, and the scripts always follow the provider `base_url` from Codex config.'
+        'For CUMOB, configure `image_api = "images"` and `image_model = "gpt-image-2.5"`. Use either `base_url = "https://api.cumob.com/v1"` or `base_url = "https://api.cumob.cn/v1"`; both domains are valid, and the scripts always follow the provider `base_url` from Codex config.'
     )
     $skillInstructions = $skillInstructions.Replace(
         'For CUMOB, configure `base_url = "http://api.cumob.com/v1"`, `image_api = "images"`, and `image_model = "gpt-image-2"`.',
-        'For CUMOB, configure `image_api = "images"` and `image_model = "gpt-image-2.5-ref"`. Use either `base_url = "https://api.cumob.com/v1"` or `base_url = "https://api.cumob.cn/v1"`; both domains are valid, and the scripts always follow the provider `base_url` from Codex config.'
+        'For CUMOB, configure `image_api = "images"` and `image_model = "gpt-image-2.5"`. Use either `base_url = "https://api.cumob.com/v1"` or `base_url = "https://api.cumob.cn/v1"`; both domains are valid, and the scripts always follow the provider `base_url` from Codex config.'
     )
     $skillInstructions = $skillInstructions.Replace(
         'image_model = "gpt-image-2"',
-        'image_model = "gpt-image-2.5-ref"'
+        'image_model = "gpt-image-2.5"'
     )
     $skillInstructions = $skillInstructions.Replace(
         'If neither Node nor Python is available, stop and tell the user one local runtime is required. Do not try to install one unless the user explicitly approves it.',
@@ -858,7 +858,7 @@ try {
     $expectedEndpoint = "$cumobBaseUrl/images/generations"
     if ($fallbackValidation.image_api -ne "images" -or
         $fallbackValidation.endpoint -ne $expectedEndpoint -or
-        $fallbackValidation.image_model -ne "gpt-image-2.5-ref") {
+        $fallbackValidation.image_model -ne "gpt-image-2.5") {
         throw "Windows PowerShell image fallback validation failed. Existing Codex files were backed up to $backupDir."
     }
 

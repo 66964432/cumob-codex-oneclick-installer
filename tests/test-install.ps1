@@ -104,7 +104,7 @@ localeOverride = "zh-CN"
     if (-not $config.Contains("[model_providers.other]")) { throw "other provider was removed" }
     if (-not $config.Contains('localeOverride = "zh-CN"')) { throw "desktop settings were removed" }
     if (-not $config.Contains('video_api = "videos"')) { throw "video_api was not installed" }
-    if (-not $config.Contains('video_model = "minimax-h3-2k-ref"')) { throw "video model was not installed" }
+    if (-not $config.Contains('video_model = "minimax-h3-2k"')) { throw "video model was not installed" }
     if ($auth.OPENAI_API_KEY -ne "test-key-one" -or $auth.OTHER_AUTH_FIELD -ne "keep-me") { throw "auth.json merge failed" }
     if ($null -eq $catalog.models -or $catalog.models.Count -ne $sourceCatalog.models.Count) { throw "model catalog was not installed" }
     if (-not (Test-Path -LiteralPath $powerShellFallback -PathType Leaf)) { throw "PowerShell image fallback was not installed" }
@@ -139,7 +139,7 @@ localeOverride = "zh-CN"
     $fallbackDryRun = $fallbackDryRunText | ConvertFrom-Json
     if ($fallbackDryRun.image_api -ne "images") { throw "PowerShell fallback did not load image_api" }
     if ($fallbackDryRun.endpoint -ne "https://api.cumob.com/v1/images/generations") { throw "PowerShell fallback endpoint is incorrect" }
-    if ($fallbackDryRun.image_model -ne "gpt-image-2.5-ref") { throw "PowerShell fallback image model is incorrect" }
+    if ($fallbackDryRun.image_model -ne "gpt-image-2.5") { throw "PowerShell fallback image model is incorrect" }
     if (-not $fallbackDryRun.has_api_key) { throw "PowerShell fallback did not detect the API key" }
     if ($fallbackDryRunText.Contains("test-key-one")) { throw "PowerShell fallback dry-run leaked the API key" }
 
@@ -171,7 +171,7 @@ localeOverride = "zh-CN"
         if ($inferredDryRun.codex_home -ne ([IO.Path]::GetFullPath($savedCodexHome))) {
             throw "PowerShell fallback did not infer Codex home from the installed skill path"
         }
-        if ($inferredDryRun.image_model -ne "gpt-image-2.5-ref") {
+        if ($inferredDryRun.image_model -ne "gpt-image-2.5") {
             throw "Skill-path home inference loaded the wrong image model"
         }
 
@@ -221,7 +221,7 @@ localeOverride = "zh-CN"
         --no-progress | Out-String)
     if ($LASTEXITCODE -ne 0) { throw "Windows image launcher PowerShell fallback failed with exit code $LASTEXITCODE" }
     $launcherDryRun = $launcherDryRunText | ConvertFrom-Json
-    if ($launcherDryRun.image_model -ne "gpt-image-2.5-ref") { throw "Windows image launcher selected the wrong model" }
+    if ($launcherDryRun.image_model -ne "gpt-image-2.5") { throw "Windows image launcher selected the wrong model" }
     Remove-Item Env:CUMOB_IMAGE_FORCE_POWERSHELL
 
     # No-prompt installs use the default .com endpoint even if config previously used .cn.
