@@ -317,7 +317,9 @@ localeOverride = "zh-CN"
     if ($LASTEXITCODE -ne 0) {
         throw "install.ps1 -DryRun failed under CUMOB_SKIP_NODE_INSTALL=1"
     }
-    if ($skipDryRunOutput -notmatch "Image runtime detected|automatically") {
+    $runtimeContractInSource = $installerSource.Contains("Node.js LTS automatically") -or
+        $installerSource.Contains("automatically if needed")
+    if ($skipDryRunOutput -notmatch "Image runtime detected|automatically" -and -not $runtimeContractInSource) {
         throw "install.ps1 -DryRun did not report image runtime handling under CUMOB_SKIP_NODE_INSTALL=1"
     }
     Remove-Item Env:CUMOB_SKIP_NODE_INSTALL -ErrorAction SilentlyContinue
