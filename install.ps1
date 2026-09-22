@@ -648,9 +648,9 @@ if ($DryRun) {
     Write-Host "Windows PowerShell fallback source: $dryRunPowerShellFallbackUrl"
     $dryRunRuntime = Ensure-ImageRuntime -DryRun
     if ($dryRunRuntime.Kind -eq "none") {
-        Write-Host "Image runtime handling: automatic Node.js LTS installation is available if needed."
+        Write-Output "Image runtime handling: automatic Node.js LTS installation is available if needed."
     } else {
-        Write-Host "Image runtime handling: $($dryRunRuntime.Detail)"
+        Write-Output "Image runtime handling: $($dryRunRuntime.Detail)"
     }
     exit 0
 }
