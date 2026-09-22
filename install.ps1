@@ -22,6 +22,11 @@ function Download-File {
         [Parameter(Mandatory = $true)][string]$Destination
     )
     Write-Host "Downloading $Url"
+    $parsedUrl = $null
+    if ([Uri]::TryCreate($Url, [UriKind]::Absolute, [ref]$parsedUrl) -and $parsedUrl.IsFile) {
+        Copy-Item -LiteralPath $parsedUrl.LocalPath -Destination $Destination -Force
+        return
+    }
     Invoke-WebRequest -Uri $Url -OutFile $Destination -UseBasicParsing
 }
 
