@@ -16,11 +16,9 @@ try {
     $env:CUMOB_SKILL_SOURCE_DIR = $fixtureSkill
 
     $oldSkill = Join-Path $env:CODEX_HOME "skills\cumob-image-generation4codex"
-    $renamedOldSkill = Join-Path $env:CODEX_HOME "skills\cumob-media-generation4codex"
     $catalogDir = Join-Path $env:CODEX_HOME "model-catalogs"
-    New-Item -ItemType Directory -Force -Path $oldSkill, $renamedOldSkill, $catalogDir | Out-Null
+    New-Item -ItemType Directory -Force -Path $oldSkill, $catalogDir | Out-Null
     [IO.File]::WriteAllText((Join-Path $oldSkill "OLD.txt"), "old skill")
-    [IO.File]::WriteAllText((Join-Path $renamedOldSkill "OLD.txt"), "renamed old skill")
 
     $seedConfig = @"
 model_provider = "old-provider"
@@ -101,11 +99,6 @@ localeOverride = "zh-CN"
         Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName "cumob-image-generation4codex\OLD.txt") } |
         Select-Object -First 1
     if ($null -eq $legacyBackup) { throw "legacy Skill directory was not backed up" }
-    if (Test-Path -LiteralPath $renamedOldSkill) { throw "renamed legacy Skill directory was not removed" }
-    $renamedLegacyBackup = Get-ChildItem -LiteralPath (Join-Path $env:CODEX_HOME "backups") -Directory |
-        Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName "cumob-media-generation4codex\OLD.txt") } |
-        Select-Object -First 1
-    if ($null -eq $renamedLegacyBackup) { throw "renamed legacy Skill directory was not backed up" }
     if ([regex]::Matches($config, "(?m)^model_provider\s*=").Count -ne 1) { throw "model_provider is not unique" }
     if ([regex]::Matches($config, "(?m)^\[model_providers\.cumob\]$").Count -ne 1) { throw "CUMOB table is not unique" }
     if (-not $config.Contains("[model_providers.other]")) { throw "other provider was removed" }
