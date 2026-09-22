@@ -332,6 +332,9 @@ localeOverride = "zh-CN"
 
     Write-Host "Windows installer integration test passed."
 
+} catch {
+    Write-Output ("::error title=Windows installer test failure::{0}" -f $_.Exception.Message)
+    throw
 } finally {
     Remove-Item Env:CUMOB_INSTALL_API_KEY -ErrorAction SilentlyContinue
     Remove-Item Env:CUMOB_SKILL_SOURCE_DIR -ErrorAction SilentlyContinue
