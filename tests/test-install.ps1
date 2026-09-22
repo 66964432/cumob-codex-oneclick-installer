@@ -100,7 +100,7 @@ localeOverride = "zh-CN"
         Select-Object -First 1
     if ($null -eq $legacyBackup) { throw "legacy Skill directory was not backed up" }
     if ([regex]::Matches($config, "(?m)^model_provider\s*=").Count -ne 1) { throw "model_provider is not unique" }
-    if ([regex]::Matches($config, "(?m)^\[model_providers\.cumob\]$").Count -ne 1) { throw "CUMOB table is not unique" }
+    if ([regex]::Matches($config, "(?m)^\[model_providers\.cumob\]\r?$" ).Count -ne 1) { throw "CUMOB table is not unique" }
     if (-not $config.Contains("[model_providers.other]")) { throw "other provider was removed" }
     if (-not $config.Contains('localeOverride = "zh-CN"')) { throw "desktop settings were removed" }
     if (-not $config.Contains('video_api = "videos"')) { throw "video_api was not installed" }
