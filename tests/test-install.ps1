@@ -333,7 +333,12 @@ localeOverride = "zh-CN"
     Write-Host "Windows installer integration test passed."
 
 } catch {
-    Write-Output ("::error title=Windows installer test failure::{0}" -f $_.Exception.Message)
+    $diagnostic = $_.Exception.Message
+    if ($configPath -and (Test-Path -LiteralPath $configPath -PathType Leaf)) {
+        $tableLines = @([IO.File]::ReadAllLines($configPath) | Where-Object { $_ -match 'model_providers\.cumob' })
+        $diagnostic = "$diagnostic; config_matches=$($tableLines -join ' | ')"
+    }
+    Write-Output ("::error title=Windows installer test failure::{0}" -f $diagnostic)
     throw
 } finally {
     Remove-Item Env:CUMOB_INSTALL_API_KEY -ErrorAction SilentlyContinue
