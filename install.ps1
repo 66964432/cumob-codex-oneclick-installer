@@ -773,6 +773,7 @@ try {
     }
 
     foreach ($line in $existingLines) {
+        $trimmedLine = $line.Trim()
         if ($line -eq "# BEGIN CUMOB CODEX ONE-CLICK INSTALLER") {
             $inManagedBlock = $true
             continue
@@ -784,6 +785,11 @@ try {
                 $section = ""
                 $skipSection = $false
             }
+            continue
+        }
+
+        if ($trimmedLine -match '^\[model_providers\.(?:cumob|"cumob"|''cumob'')\]\s*(?:#.*)?$') {
+            $skipSection = $true
             continue
         }
 
