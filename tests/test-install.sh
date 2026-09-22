@@ -4,13 +4,13 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEST_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/cumob-installer-test.XXXXXX")"
 trap 'rm -rf "$TEST_ROOT"' EXIT
 export CODEX_HOME="$TEST_ROOT/.codex"
-mkdir -p "$CODEX_HOME/skills/cumob-image-generation4codex" "$CODEX_HOME/model-catalogs"
+mkdir -p "$CODEX_HOME/skills/cumob-media-generation4codex" "$CODEX_HOME/skills/cumob-image-generation4codex" "$CODEX_HOME/model-catalogs"
 if [ "${CUMOB_LIVE_TEST:-0}" != "1" ]; then
   fixture_skill="$TEST_ROOT/fixture-skill"
   mkdir -p "$fixture_skill/scripts"
   cat > "$fixture_skill/SKILL.md" <<'SKILL'
 ---
-name: cumob-media-generation4codex
+name: cumob-media-generation
 description: Installer test fixture.
 ---
 SKILL
@@ -38,6 +38,7 @@ export CUMOB_MERGE_AWK_URL="$(to_file_url "$fixture_remote/scripts/merge-config.
 export CUMOB_MERGE_AUTH_MJS_URL="$(to_file_url "$fixture_remote/scripts/merge-auth.mjs")"
 export CUMOB_MERGE_AUTH_PY_URL="$(to_file_url "$fixture_remote/scripts/merge_auth.py")"
 printf '%s\n' "old skill" > "$CODEX_HOME/skills/cumob-image-generation4codex/OLD.txt"
+printf '%s\n' "renamed old skill" > "$CODEX_HOME/skills/cumob-media-generation4codex/OLD.txt"
 cat > "$CODEX_HOME/config.toml" <<'CFG'
 model_provider = "old-provider"
 model = "old-model"
@@ -72,7 +73,7 @@ const sourceCatalog = JSON.parse(fs.readFileSync(process.argv[3], "utf8"));
 const config = fs.readFileSync(path.join(home, "config.toml"), "utf8");
 const auth = JSON.parse(fs.readFileSync(path.join(home, "auth.json"), "utf8"));
 const catalog = JSON.parse(fs.readFileSync(path.join(home, "model-catalogs", "cumob-models.json"), "utf8"));
-const version = fs.readFileSync(path.join(home, "skills", "cumob-media-generation4codex", "VERSION"), "utf8").trim();
+const version = fs.readFileSync(path.join(home, "skills", "cumob-media-generation", "VERSION"), "utf8").trim();
 const expectedVersion = process.env.EXPECTED_SKILL_VERSION;
 function count(pattern) { return (config.match(pattern) || []).length; }
 if (fs.existsSync(path.join(home, "skills", "cumob-image-generation4codex"))) throw new Error("legacy Skill directory was not removed");
@@ -81,6 +82,11 @@ const legacyWasBackedUp = fs.readdirSync(backupRoot).some((entry) =>
   fs.existsSync(path.join(backupRoot, entry, "cumob-image-generation4codex", "OLD.txt"))
 );
 if (!legacyWasBackedUp) throw new Error("legacy Skill directory was not backed up");
+const renamedSkillWasBackedUp = fs.readdirSync(backupRoot).some((entry) =>
+  fs.existsSync(path.join(backupRoot, entry, "cumob-media-generation4codex", "OLD.txt"))
+);
+if (!renamedSkillWasBackedUp) throw new Error("renamed legacy Skill directory was not backed up");
+if (fs.existsSync(path.join(home, "skills", "cumob-media-generation4codex"))) throw new Error("renamed legacy Skill directory was not removed");
 if (count(/^model_provider\s*=/gm) !== 1) throw new Error("model_provider is not unique");
 if (count(/^\[model_providers\.cumob\]$/gm) !== 1) throw new Error("CUMOB table is not unique");
 if (!config.includes('[model_providers.other]')) throw new Error("other provider was removed");
@@ -96,6 +102,8 @@ if (auth.OPENAI_API_KEY !== "test-key-one") throw new Error("API key was not upd
 if (auth.OTHER_AUTH_FIELD !== "keep-me") throw new Error("auth fields were not preserved");
 if (!Array.isArray(catalog.models) || catalog.models.length !== sourceCatalog.models.length) throw new Error("model catalog was not installed");
 if (!catalog.models.some((model) => model.slug === "gpt-5.6-sol")) throw new Error("expected default model is missing");
+if (!catalog.models.some((model) => model.slug === "deepseek-v4.1-flash")) throw new Error("updated model catalog is missing DeepSeek");
+if (!catalog.models.some((model) => model.slug === "glm-5.3")) throw new Error("updated model catalog is missing GLM");
 if (expectedVersion && version !== expectedVersion) throw new Error("skill version mismatch");
 if (!version) throw new Error("installed skill version is empty");
 NODE
@@ -117,7 +125,7 @@ if (auth.OPENAI_API_KEY !== "test-key-two") throw new Error("reinstall did not u
 if (backups.length < 2) throw new Error("reinstall did not create a second backup");
 NODE
 if [ "${CUMOB_LIVE_TEST:-0}" = "1" ]; then
-  node "$CODEX_HOME/skills/cumob-media-generation4codex/scripts/generate-image.mjs" \
+  node "$CODEX_HOME/skills/cumob-media-generation/scripts/generate-image.mjs" \
     --prompt "Installer configuration check" \
     --out "$TEST_ROOT/unused.png" \
     --dry-run > "$TEST_ROOT/dry-run.json"

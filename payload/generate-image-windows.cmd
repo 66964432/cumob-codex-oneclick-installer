@@ -5,7 +5,7 @@ set "SCRIPT_DIR=%~dp0"
 
 rem When Codex launches this skill from a restricted shell, USERPROFILE /
 rem GetFolderPath may be empty. Infer CODEX_HOME from the installed skill path:
-rem <CODEX_HOME>\skills\cumob-media-generation4codex\scripts\generate-image-windows.cmd
+rem <CODEX_HOME>\skills\cumob-media-generation\scripts\generate-image-windows.cmd
 if not defined CODEX_HOME (
   for %%I in ("%SCRIPT_DIR%..\..\..") do set "CUMOB_INFERRED_CODEX_HOME=%%~fI"
   if defined CUMOB_INFERRED_CODEX_HOME if exist "%CUMOB_INFERRED_CODEX_HOME%\config.toml" (

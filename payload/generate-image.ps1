@@ -169,7 +169,7 @@ function Get-InstalledSkillCodexHome {
 
     try {
         # Installed layout:
-        # <CODEX_HOME>\skills\cumob-media-generation4codex\scripts\generate-image.ps1
+        # <CODEX_HOME>\skills\cumob-media-generation\scripts\generate-image.ps1
         $candidate = Resolve-FullPath (Join-Path $PSScriptRoot "..\..\..")
     } catch {
         return $null
@@ -208,7 +208,7 @@ function Resolve-DefaultCodexHome {
     $homeDrive = Get-EnvironmentValue "HOMEDRIVE"
     $homePath = Get-EnvironmentValue "HOMEPATH"
     if (-not [string]::IsNullOrWhiteSpace($homeDrive) -and -not [string]::IsNullOrWhiteSpace($homePath)) {
-        [void]$profileBases.Add(($homeDrive.TrimEnd("\\", "/") + $homePath))
+        [void]$profileBases.Add(($homeDrive.TrimEnd("\", "/") + $homePath))
     }
 
     $seen = @{}

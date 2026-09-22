@@ -6,7 +6,7 @@ One-click macOS / Windows installer that connects Codex to the CUMOB custom rout
 
 After installation, it automatically:
 
-1. Installs the latest `cumob-media-generation4codex` Skill
+1. Installs the latest `cumob-media-generation` Skill
 2. Writes the CUMOB provider configuration
 3. Installs the custom model catalog `cumob-models.json`
 4. Merges the CUMOB API Key into Codex `auth.json`
@@ -21,7 +21,7 @@ After installation, it automatically:
 ## Repositories
 
 - Installer: [`66964432/cumob-codex-oneclick-installer`](https://github.com/66964432/cumob-codex-oneclick-installer)
-- Skill: [`66964432/cumob-media-generation4codex`](https://github.com/66964432/cumob-media-generation4codex)
+- Skill: [`66964432/cumob-media-generation`](https://github.com/66964432/cumob-media-generation)
 - Latest release: https://github.com/66964432/cumob-codex-oneclick-installer/releases/latest
 
 ## Prerequisites
@@ -137,14 +137,14 @@ Files written:
 ├── model-catalogs/
 │   └── cumob-models.json
 ├── skills/
-│   └── cumob-media-generation4codex/
+│   └── cumob-media-generation/
 └── backups/
     └── cumob-installer-YYYYMMDD-HHMMSS/
 ```
 
 The installer configures:
 
-- The latest `cumob-media-generation4codex` Skill
+- The latest `cumob-media-generation` Skill
 - The CUMOB model catalog
 - The CUMOB provider config
 - The API Key in Codex `auth.json`
@@ -154,7 +154,7 @@ The installer configures:
 In Codex, check that:
 
 1. CUMOB models appear in the model list, for example `gpt-5.6-sol`
-2. The media Skill `cumob-media-generation4codex` is available
+2. The media Skill `cumob-media-generation` is available
 3. Image generation no longer complains about a missing API Key / provider
 
 ## Upgrade
@@ -251,7 +251,7 @@ Custom remote sources:
 
 ```bash
 export CUMOB_INSTALLER_URL="https://github.com/66964432/cumob-codex-oneclick-installer/archive/refs/heads/main.zip"
-export CUMOB_SKILL_URL="https://github.com/66964432/cumob-media-generation4codex/archive/refs/heads/main.zip"
+export CUMOB_SKILL_URL="https://github.com/66964432/cumob-media-generation/archive/refs/heads/main.zip"
 export CUMOB_MODELS_URL="https://raw.githubusercontent.com/66964432/cumob-codex-oneclick-installer/main/payload/cumob-models.json"
 bash install.sh
 ```
@@ -279,7 +279,7 @@ Confirm that:
 - No corporate proxy / firewall is blocking the download
 - These repositories are accessible:
   - `https://github.com/66964432/cumob-codex-oneclick-installer`
-  - `https://github.com/66964432/cumob-media-generation4codex`
+  - `https://github.com/66964432/cumob-media-generation`
 
 Then run the installer again.
 
@@ -329,7 +329,7 @@ Backup directories:
 The Windows installation adds a unified launcher to the Skill:
 
 ```powershell
-& "$env:USERPROFILE\.codex\skills\cumob-media-generation4codex\scripts\generate-image-windows.cmd" `
+& "$env:USERPROFILE\.codex\skills\cumob-media-generation\scripts\generate-image-windows.cmd" `
   --prompt "A quick test image" `
   --out "$env:TEMP\cumob-test.png" `
   --dry-run

@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PAYLOAD_DIR="$SCRIPT_DIR/payload"
 DEFAULT_INSTALLER_ARCHIVE_URL="https://github.com/66964432/cumob-codex-oneclick-installer/archive/refs/heads/main.zip"
-DEFAULT_SKILL_ARCHIVE_URL="https://github.com/66964432/cumob-media-generation4codex/archive/refs/heads/main.zip"
+DEFAULT_SKILL_ARCHIVE_URL="https://github.com/66964432/cumob-media-generation/archive/refs/heads/main.zip"
 DEFAULT_MODELS_URL="https://raw.githubusercontent.com/66964432/cumob-codex-oneclick-installer/main/payload/cumob-models.json"
 DEFAULT_TEMPLATE_URL="https://raw.githubusercontent.com/66964432/cumob-codex-oneclick-installer/main/payload/cumob-config.template.toml"
 DEFAULT_MERGE_AWK_URL="https://raw.githubusercontent.com/66964432/cumob-codex-oneclick-installer/main/scripts/merge-config.awk"
@@ -260,8 +260,9 @@ ensure_runtime_assets() {
 
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 SKILLS_DIR="$CODEX_HOME/skills"
-SKILL_TARGET="$SKILLS_DIR/cumob-media-generation4codex"
-LEGACY_SKILL_TARGET="$SKILLS_DIR/cumob-image-generation4codex"
+SKILL_TARGET="$SKILLS_DIR/cumob-media-generation"
+LEGACY_SKILL_TARGET="$SKILLS_DIR/cumob-media-generation4codex"
+PREVIOUS_LEGACY_SKILL_TARGET="$SKILLS_DIR/cumob-image-generation4codex"
 CATALOG_DIR="$CODEX_HOME/model-catalogs"
 CATALOG_TARGET="$CATALOG_DIR/cumob-models.json"
 CONFIG_PATH="$CODEX_HOME/config.toml"
@@ -289,7 +290,7 @@ if [ -z "$SKILL_SOURCE" ]; then
   if [ -z "$DOWNLOAD_ROOT" ]; then
     DOWNLOAD_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/cumob-skill-download.XXXXXX")"
   fi
-  skill_archive="$DOWNLOAD_ROOT/cumob-media-generation4codex.zip"
+  skill_archive="$DOWNLOAD_ROOT/cumob-media-generation.zip"
   skill_extract_dir="$DOWNLOAD_ROOT/skill-extracted"
   mkdir -p "$skill_extract_dir"
 
@@ -349,18 +350,22 @@ if [ -f "$CATALOG_TARGET" ]; then
   cp "$CATALOG_TARGET" "$backup_dir/cumob-models.json"
 fi
 if [ -d "$SKILL_TARGET" ]; then
-  cp -R "$SKILL_TARGET" "$backup_dir/cumob-media-generation4codex"
+  cp -R "$SKILL_TARGET" "$backup_dir/cumob-media-generation"
 fi
 if [ -d "$LEGACY_SKILL_TARGET" ]; then
-  cp -R "$LEGACY_SKILL_TARGET" "$backup_dir/cumob-image-generation4codex"
+  cp -R "$LEGACY_SKILL_TARGET" "$backup_dir/cumob-media-generation4codex"
+fi
+if [ -d "$PREVIOUS_LEGACY_SKILL_TARGET" ]; then
+  cp -R "$PREVIOUS_LEGACY_SKILL_TARGET" "$backup_dir/cumob-image-generation4codex"
 fi
 
-temp_skill="$SKILLS_DIR/.cumob-media-generation4codex.tmp.$$"
+temp_skill="$SKILLS_DIR/.cumob-media-generation.tmp.$$"
 rm -rf "$temp_skill"
 cp -R "$SKILL_SOURCE" "$temp_skill"
 rm -rf "$SKILL_TARGET"
 mv "$temp_skill" "$SKILL_TARGET"
 rm -rf "$LEGACY_SKILL_TARGET"
+rm -rf "$PREVIOUS_LEGACY_SKILL_TARGET"
 cp "$CATALOG_SOURCE" "$CATALOG_TARGET"
 
 FILTERED_CONFIG="$(mktemp "${TMPDIR:-/tmp}/cumob-config-filtered.XXXXXX")"
