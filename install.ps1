@@ -30,6 +30,25 @@ function Download-File {
     Invoke-WebRequest -Uri $Url -OutFile $Destination -UseBasicParsing
 }
 
+function Backup-Directory {
+    param(
+        [Parameter(Mandatory = $true)][string]$Source,
+        [Parameter(Mandatory = $true)][string]$Destination
+    )
+
+    if (-not (Test-Path -LiteralPath $Source -PathType Container)) {
+        return
+    }
+
+    # Copy the directory contents explicitly. PowerShell 5.1 can otherwise
+    # treat a destination whose leaf matches the source leaf as a nested copy
+    # and fail when the installer is run repeatedly in the same second.
+    New-Item -ItemType Directory -Force -Path $Destination | Out-Null
+    Get-ChildItem -LiteralPath $Source -Force | ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination $Destination -Recurse -Force
+    }
+}
+
 function Get-PythonRuntimeCommand {
     foreach ($candidate in @("py", "python", "python3")) {
         $command = Get-Command $candidate -ErrorAction SilentlyContinue
@@ -729,21 +748,15 @@ try {
     if (Test-Path -LiteralPath $catalogTarget -PathType Leaf) {
         Copy-Item -LiteralPath $catalogTarget -Destination (Join-Path $backupDir "cumob-models.json")
     }
-    if (Test-Path -LiteralPath $skillTarget -PathType Container) {
-        Copy-Item -LiteralPath $skillTarget `
-            -Destination (Join-Path $backupDir "cumob-media-generation") `
-            -Recurse
-    }
-    if (Test-Path -LiteralPath $legacySkillTarget -PathType Container) {
-        Copy-Item -LiteralPath $legacySkillTarget `
-            -Destination (Join-Path $backupDir "cumob-media-generation4codex") `
-            -Recurse
-    }
-    if (Test-Path -LiteralPath $previousLegacySkillTarget -PathType Container) {
-        Copy-Item -LiteralPath $previousLegacySkillTarget `
-            -Destination (Join-Path $backupDir "cumob-image-generation4codex") `
-            -Recurse
-    }
+    Backup-Directory `
+        -Source $skillTarget `
+        -Destination (Join-Path $backupDir "cumob-media-generation")
+    Backup-Directory `
+        -Source $legacySkillTarget `
+        -Destination (Join-Path $backupDir "cumob-media-generation4codex")
+    Backup-Directory `
+        -Source $previousLegacySkillTarget `
+        -Destination (Join-Path $backupDir "cumob-image-generation4codex")
 
     $tempSkill = Join-Path $skillsDir ".cumob-media-generation.tmp.$PID"
     if (Test-Path -LiteralPath $tempSkill) {
