@@ -187,6 +187,60 @@ download_file() {
   curl -fsSL --retry 3 --retry-delay 2 -o "$dest" "$url"
 }
 
+resolve_catalog_defaults() {
+  local catalog_path="$1"
+  local result=""
+
+  if command -v node >/dev/null 2>&1; then
+    result="$(node - "$catalog_path" <<'NODE'
+const fs = require("fs");
+const catalog = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+const models = Array.isArray(catalog.models) ? catalog.models : [];
+const eligible = models.filter((model) =>
+  model && model.supported_in_api === true && model.visibility === "list" &&
+  typeof model.slug === "string" && Number.isInteger(model.priority) &&
+  typeof model.default_reasoning_level === "string"
+);
+if (!eligible.length) throw new Error("no visible API-supported model with a valid priority");
+eligible.sort((a, b) => a.priority - b.priority);
+process.stdout.write(`${eligible[0].slug}\t${eligible[0].default_reasoning_level}`);
+NODE
+    )"
+  elif command -v python3 >/dev/null 2>&1; then
+    result="$(python3 - "$catalog_path" <<'PY'
+import json
+import sys
+with open(sys.argv[1], encoding="utf-8") as stream:
+    catalog = json.load(stream)
+models = catalog.get("models", []) if isinstance(catalog, dict) else []
+eligible = [
+    model for model in models
+    if isinstance(model, dict)
+    and model.get("supported_in_api") is True
+    and model.get("visibility") == "list"
+    and isinstance(model.get("slug"), str)
+    and isinstance(model.get("priority"), int)
+    and not isinstance(model.get("priority"), bool)
+    and isinstance(model.get("default_reasoning_level"), str)
+]
+if not eligible:
+    raise SystemExit("no visible API-supported model with a valid priority")
+model = min(eligible, key=lambda item: item["priority"])
+print(f'{model["slug"]}\t{model["default_reasoning_level"]}', end="")
+PY
+    )"
+  else
+    printf '%s\n' "A Node.js or Python 3 runtime is required to read the model catalog." >&2
+    exit 1
+  fi
+
+  IFS=$'\t' read -r DEFAULT_MODEL DEFAULT_REASONING_LEVEL <<< "$result"
+  if [ -z "$DEFAULT_MODEL" ] || [ -z "$DEFAULT_REASONING_LEVEL" ]; then
+    printf '%s\n' "Invalid model catalog: could not determine the default model." >&2
+    exit 1
+  fi
+}
+
 ensure_runtime_assets() {
   local catalog_source="$PAYLOAD_DIR/cumob-models.json"
   local template_source="$PAYLOAD_DIR/cumob-config.template.toml"
@@ -283,6 +337,7 @@ if [ "$DRY_RUN" -eq 1 ]; then
 fi
 
 ensure_runtime_assets
+resolve_catalog_defaults "$CATALOG_SOURCE"
 
 SKILL_SOURCE="${CUMOB_SKILL_SOURCE_DIR:-}"
 if [ -z "$SKILL_SOURCE" ]; then
@@ -384,6 +439,8 @@ if [ -f "$TEMPLATE_SOURCE" ]; then
   managed_block="$(
     sed \
       -e "s|{{MODEL_CATALOG_PATH}}|$catalog_toml_path|g" \
+      -e "s|{{DEFAULT_MODEL}}|$DEFAULT_MODEL|g" \
+      -e "s|{{DEFAULT_REASONING_LEVEL}}|$DEFAULT_REASONING_LEVEL|g" \
       -e "s|{{CUMOB_BASE_URL}}|$cumob_base_url|g" \
       "$TEMPLATE_SOURCE"
   )"
@@ -391,10 +448,10 @@ else
   managed_block="$(
     printf '%s\n' \
       'model_provider = "cumob"' \
-      'model = "gpt-6-astra"' \
+      "model = \"$DEFAULT_MODEL\"" \
       'disable_response_storage = true' \
       "model_catalog_json = \"$catalog_toml_path\"" \
-      'model_reasoning_effort = "high"' \
+      "model_reasoning_effort = \"$DEFAULT_REASONING_LEVEL\"" \
       '' \
       '[model_providers.cumob]' \
       'name = "cumob"' \

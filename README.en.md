@@ -196,6 +196,15 @@ requires_openai_auth = true
 base_url = "https://api.cumob.com/v1"
 ```
 
+Model catalog maintenance uses a single source of truth:
+
+- Add, remove, or modify chat models only in `payload/cumob-models.json`
+- The installer selects the model with the lowest `priority` among entries where `supported_in_api = true` and `visibility = "list"` as the default model
+- The selected model's `default_reasoning_level` is also written to `model_reasoning_effort`
+- `SOURCE.json` no longer stores a manually maintained model count; installer tests compare the source and installed catalogs automatically
+
+Image and video models are provider settings and remain managed by `image_model` and `video_model` in `payload/cumob-config.template.toml`.
+
 `base_url` accepts both `https://api.cumob.com/v1` and `https://api.cumob.cn/v1`.
 
 - Interactive install prompt: `1 = https://api.cumob.com/v1` (default), `2 = https://api.cumob.cn/v1`

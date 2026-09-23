@@ -101,18 +101,35 @@ if (configuredCatalog !== expectedCatalog) throw new Error("catalog path points 
 if (auth.OPENAI_API_KEY !== "test-key-one") throw new Error("API key was not updated");
 if (auth.OTHER_AUTH_FIELD !== "keep-me") throw new Error("auth fields were not preserved");
 if (!Array.isArray(catalog.models) || catalog.models.length !== sourceCatalog.models.length) throw new Error("model catalog was not installed");
-if (!catalog.models.some((model) => model.slug === "gpt-5.6-sol")) throw new Error("expected default model is missing");
-if (!catalog.models.some((model) => model.slug === "deepseek-v4.1-flash")) throw new Error("updated model catalog is missing DeepSeek");
-if (!catalog.models.some((model) => model.slug === "glm-5.3")) throw new Error("updated model catalog is missing GLM");
+const sourceSlugs = sourceCatalog.models.map((model) => model.slug).sort();
+const installedSlugs = catalog.models.map((model) => model.slug).sort();
+if (JSON.stringify(installedSlugs) !== JSON.stringify(sourceSlugs)) throw new Error("installed model catalog differs from source catalog");
+const expectedDefault = sourceCatalog.models
+  .filter((model) => model.supported_in_api === true && model.visibility === "list")
+  .sort((a, b) => a.priority - b.priority)[0];
+const configuredModel = config.match(/^model\s*=\s*"([^"]+)"$/m);
+if (!configuredModel || configuredModel[1] !== expectedDefault.slug) throw new Error("default model was not derived from the catalog");
+const configuredReasoning = config.match(/^model_reasoning_effort\s*=\s*"([^"]+)"$/m);
+if (!configuredReasoning || configuredReasoning[1] !== expectedDefault.default_reasoning_level) throw new Error("default reasoning level was not derived from the catalog");
 if (expectedVersion && version !== expectedVersion) throw new Error("skill version mismatch");
 if (!version) throw new Error("installed skill version is empty");
 NODE
 REMOTE_ONLY_DIR="$TEST_ROOT/remote-only-installer"
 mkdir -p "$REMOTE_ONLY_DIR"
 cp "$ROOT_DIR/install.sh" "$REMOTE_ONLY_DIR/install.sh"
+node - "$fixture_remote/payload/cumob-models.json" "$TEST_ROOT/removed-default.txt" <<'NODE'
+const fs = require("fs");
+const file = process.argv[2];
+const catalog = JSON.parse(fs.readFileSync(file, "utf8"));
+const eligible = catalog.models.filter((model) => model.supported_in_api === true && model.visibility === "list");
+const oldDefault = eligible.sort((a, b) => a.priority - b.priority)[0];
+fs.writeFileSync(process.argv[3], oldDefault.slug);
+catalog.models = catalog.models.filter((model) => model.slug !== oldDefault.slug);
+fs.writeFileSync(file, JSON.stringify(catalog, null, 2) + "\n");
+NODE
 export CUMOB_INSTALL_API_KEY="test-key-two"
 bash "$REMOTE_ONLY_DIR/install.sh" --no-prompt >/dev/null
-node - "$CODEX_HOME" <<'NODE'
+node - "$CODEX_HOME" "$fixture_remote/payload/cumob-models.json" "$TEST_ROOT/removed-default.txt" <<'NODE'
 const fs = require("fs");
 const path = require("path");
 const home = process.argv[2];
@@ -122,6 +139,13 @@ const backups = fs.readdirSync(path.join(home, "backups"));
 if ((config.match(/^model_provider\s*=/gm) || []).length !== 1) throw new Error("reinstall duplicated model_provider");
 if ((config.match(/^\[model_providers\.cumob\]$/gm) || []).length !== 1) throw new Error("reinstall duplicated CUMOB table");
 if (auth.OPENAI_API_KEY !== "test-key-two") throw new Error("reinstall did not update API key");
+const source = JSON.parse(fs.readFileSync(process.argv[3], "utf8"));
+const installed = JSON.parse(fs.readFileSync(path.join(home, "model-catalogs", "cumob-models.json"), "utf8"));
+const removed = fs.readFileSync(process.argv[4], "utf8");
+const selected = source.models.filter((model) => model.supported_in_api === true && model.visibility === "list")
+  .sort((a, b) => a.priority - b.priority)[0];
+if (!selected || !config.includes(`model = "${selected.slug}"`)) throw new Error("remote catalog deletion did not update the default model");
+if (installed.models.some((model) => model.slug === removed)) throw new Error("removed model remains installed");
 if (backups.length < 2) throw new Error("reinstall did not create a second backup");
 NODE
 if [ "${CUMOB_LIVE_TEST:-0}" = "1" ]; then

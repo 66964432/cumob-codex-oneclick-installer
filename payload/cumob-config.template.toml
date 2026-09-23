@@ -1,11 +1,11 @@
 # Portable subset of the current Codex configuration.
-# The installer replaces {{MODEL_CATALOG_PATH}} with the local absolute path.
+# The installer fills in the catalog path and derives the default model from that catalog.
 
 model_provider = "cumob"
-model = "gpt-6-astra"
+model = "{{DEFAULT_MODEL}}"
 disable_response_storage = true
 model_catalog_json = "{{MODEL_CATALOG_PATH}}"
-model_reasoning_effort = "high"
+model_reasoning_effort = "{{DEFAULT_REASONING_LEVEL}}"
 
 [model_providers.cumob]
 name = "cumob"

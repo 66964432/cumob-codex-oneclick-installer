@@ -17,6 +17,7 @@ command -v openssl >/dev/null 2>&1 || {
   exit 1
 }
 
+python3 "$ROOT_DIR/scripts/validate-model-catalog.py" "$ROOT_DIR/payload/cumob-models.json"
 bash "$ROOT_DIR/tests/test-install.sh"
 
 (

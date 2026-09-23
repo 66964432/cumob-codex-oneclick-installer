@@ -107,8 +107,17 @@ localeOverride = "zh-CN"
     if (-not $config.Contains('video_model = "minimax-h3-2k"')) { throw "video model was not installed" }
     if ($auth.OPENAI_API_KEY -ne "test-key-one" -or $auth.OTHER_AUTH_FIELD -ne "keep-me") { throw "auth.json merge failed" }
     if ($null -eq $catalog.models -or $catalog.models.Count -ne $sourceCatalog.models.Count) { throw "model catalog was not installed" }
-    if (-not (@($catalog.models | ForEach-Object { $_.slug }) -contains "deepseek-v4.1-flash")) { throw "updated model catalog is missing DeepSeek" }
-    if (-not (@($catalog.models | ForEach-Object { $_.slug }) -contains "glm-5.3")) { throw "updated model catalog is missing GLM" }
+    $sourceSlugs = @($sourceCatalog.models | ForEach-Object { [string]$_.slug } | Sort-Object)
+    $installedSlugs = @($catalog.models | ForEach-Object { [string]$_.slug } | Sort-Object)
+    if (($installedSlugs -join "`n") -ne ($sourceSlugs -join "`n")) { throw "installed model catalog differs from source catalog" }
+    $expectedDefault = @($sourceCatalog.models |
+        Where-Object { $_.supported_in_api -eq $true -and $_.visibility -eq "list" } |
+        Sort-Object { [int]$_.priority } |
+        Select-Object -First 1)
+    $configuredModel = [regex]::Match($config, '(?m)^model\s*=\s*"([^"]+)"$')
+    if (-not $configuredModel.Success -or $configuredModel.Groups[1].Value -ne [string]$expectedDefault.slug) { throw "default model was not derived from the catalog" }
+    $configuredReasoning = [regex]::Match($config, '(?m)^model_reasoning_effort\s*=\s*"([^"]+)"$')
+    if (-not $configuredReasoning.Success -or $configuredReasoning.Groups[1].Value -ne [string]$expectedDefault.default_reasoning_level) { throw "default reasoning level was not derived from the catalog" }
     if (-not (Test-Path -LiteralPath $powerShellFallback -PathType Leaf)) { throw "PowerShell image fallback was not installed" }
     if (-not (Test-Path -LiteralPath $windowsImageLauncher -PathType Leaf)) { throw "Windows image launcher was not installed" }
     $installedSkillInstructions = [IO.File]::ReadAllText((Join-Path $installedSkill "SKILL.md"))
@@ -296,7 +305,20 @@ localeOverride = "zh-CN"
     Copy-Item -LiteralPath (Join-Path $rootDir "payload\generate-image.ps1") -Destination (Join-Path $fixtureRemote "payload\generate-image.ps1")
     Copy-Item -LiteralPath (Join-Path $rootDir "payload\generate-image-windows.cmd") -Destination (Join-Path $fixtureRemote "payload\generate-image-windows.cmd")
 
-    $env:CUMOB_MODELS_URL = ([Uri](Join-Path $fixtureRemote "payload\cumob-models.json")).AbsoluteUri
+    $remoteCatalogPath = Join-Path $fixtureRemote "payload\cumob-models.json"
+    $remoteCatalog = [IO.File]::ReadAllText($remoteCatalogPath) | ConvertFrom-Json
+    $oldDefault = @($remoteCatalog.models |
+        Where-Object { $_.supported_in_api -eq $true -and $_.visibility -eq "list" } |
+        Sort-Object { [int]$_.priority } |
+        Select-Object -First 1)[0]
+    $remoteCatalog.models = @($remoteCatalog.models | Where-Object { $_.slug -ne $oldDefault.slug })
+    [IO.File]::WriteAllText($remoteCatalogPath, ($remoteCatalog | ConvertTo-Json -Depth 100))
+    $newDefault = @($remoteCatalog.models |
+        Where-Object { $_.supported_in_api -eq $true -and $_.visibility -eq "list" } |
+        Sort-Object { [int]$_.priority } |
+        Select-Object -First 1)[0]
+
+    $env:CUMOB_MODELS_URL = ([Uri]$remoteCatalogPath).AbsoluteUri
     $env:CUMOB_CONFIG_TEMPLATE_URL = ([Uri](Join-Path $fixtureRemote "payload\cumob-config.template.toml")).AbsoluteUri
     $env:CUMOB_POWERSHELL_FALLBACK_URL = ([Uri](Join-Path $fixtureRemote "payload\generate-image.ps1")).AbsoluteUri
     $env:CUMOB_WINDOWS_IMAGE_LAUNCHER_URL = ([Uri](Join-Path $fixtureRemote "payload\generate-image-windows.cmd")).AbsoluteUri
@@ -308,6 +330,9 @@ localeOverride = "zh-CN"
     $backups = Get-ChildItem -LiteralPath (Join-Path $env:CODEX_HOME "backups")
     if ([regex]::Matches($config, "(?m)^model_provider\s*=").Count -ne 1) { throw "reinstall duplicated model_provider" }
     if ($auth.OPENAI_API_KEY -ne "test-key-two") { throw "reinstall did not update API key" }
+    $remoteInstalled = [IO.File]::ReadAllText((Join-Path $env:CODEX_HOME "model-catalogs\cumob-models.json")) | ConvertFrom-Json
+    if (-not $config.Contains(('model = "{0}"' -f $newDefault.slug))) { throw "remote catalog deletion did not update the default model" }
+    if (@($remoteInstalled.models | Where-Object { $_.slug -eq $oldDefault.slug }).Count -ne 0) { throw "removed model remains installed" }
     if ($backups.Count -lt 2) { throw "reinstall did not create a second backup" }
 
     # Static coverage for automatic Node install controls.

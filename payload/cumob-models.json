@@ -50,6 +50,49 @@
       "context_window": 272000,
       "default_reasoning_level": "high",
       "default_reasoning_summary": "none",
+      "description": "gpt-6-sol",
+      "display_name": "gpt-6-sol",
+      "effective_context_window_percent": 95,
+      "experimental_supported_tools": [],
+      "input_modalities": [
+        "text",
+        "image"
+      ],
+      "max_context_window": 272000,
+      "priority": 1010,
+      "service_tiers": [],
+      "shell_type": "shell_command",
+      "slug": "gpt-6-sol",
+      "support_verbosity": false,
+      "supported_in_api": true,
+      "supported_reasoning_levels": [
+        {
+          "description": "Disable Thinking",
+          "effort": "none"
+        },
+        {
+          "description": "Enabled Thinking",
+          "effort": "high"
+        }
+      ],
+      "supports_image_detail_original": false,
+      "supports_parallel_tool_calls": false,
+      "supports_reasoning_summaries": true,
+      "supports_search_tool": false,
+      "truncation_policy": {
+        "limit": 10000,
+        "mode": "bytes"
+      },
+      "upgrade": null,
+      "visibility": "list"
+    },
+    {
+      "additional_speed_tiers": [],
+      "availability_nux": null,
+      "base_instructions": "You are Codex, a coding agent. You and the user share the same workspace and collaborate to achieve the user's goals.",
+      "context_window": 272000,
+      "default_reasoning_level": "high",
+      "default_reasoning_summary": "none",
       "description": "GPT-5.6 Sol",
       "display_name": "GPT-5.6 Sol",
       "effective_context_window_percent": 95,
@@ -262,50 +305,7 @@
       "additional_speed_tiers": [],
       "availability_nux": null,
       "base_instructions": "You are Codex, a coding agent. You and the user share the same workspace and collaborate to achieve the user's goals.",
-      "context_window": 272000,
-      "default_reasoning_level": "high",
-      "default_reasoning_summary": "none",
-      "description": "DeepSeek V4.1 Flash",
-      "display_name": "DeepSeek V4.1 Flash",
-      "effective_context_window_percent": 95,
-      "experimental_supported_tools": [],
-      "input_modalities": [
-        "text",
-        "image"
-      ],
-      "max_context_window": 272000,
-      "priority": 1006,
-      "service_tiers": [],
-      "shell_type": "shell_command",
-      "slug": "deepseek-v4.1-flash",
-      "support_verbosity": false,
-      "supported_in_api": true,
-      "supported_reasoning_levels": [
-        {
-          "description": "Disable Thinking",
-          "effort": "none"
-        },
-        {
-          "description": "Enabled Thinking",
-          "effort": "high"
-        }
-      ],
-      "supports_image_detail_original": false,
-      "supports_parallel_tool_calls": false,
-      "supports_reasoning_summaries": true,
-      "supports_search_tool": false,
-      "truncation_policy": {
-        "limit": 10000,
-        "mode": "bytes"
-      },
-      "upgrade": null,
-      "visibility": "list"
-    },
-    {
-      "additional_speed_tiers": [],
-      "availability_nux": null,
-      "base_instructions": "You are Codex, a coding agent. You and the user share the same workspace and collaborate to achieve the user's goals.",
-      "context_window": 272000,
+      "context_window": 1000000,
       "default_reasoning_level": "high",
       "default_reasoning_summary": "none",
       "description": "Grok 4.7",
@@ -316,7 +316,7 @@
         "text",
         "image"
       ],
-      "max_context_window": 272000,
+      "max_context_window": 1000000,
       "priority": 1007,
       "service_tiers": [],
       "shell_type": "shell_command",
@@ -348,7 +348,50 @@
       "additional_speed_tiers": [],
       "availability_nux": null,
       "base_instructions": "You are Codex, a coding agent. You and the user share the same workspace and collaborate to achieve the user's goals.",
-      "context_window": 272000,
+      "context_window": 1000000,
+      "default_reasoning_level": "high",
+      "default_reasoning_summary": "none",
+      "description": "DeepSeek V4.1 Flash",
+      "display_name": "DeepSeek V4.1 Flash",
+      "effective_context_window_percent": 95,
+      "experimental_supported_tools": [],
+      "input_modalities": [
+        "text",
+        "image"
+      ],
+      "max_context_window": 1000000,
+      "priority": 1006,
+      "service_tiers": [],
+      "shell_type": "shell_command",
+      "slug": "deepseek-v4.1-flash",
+      "support_verbosity": false,
+      "supported_in_api": true,
+      "supported_reasoning_levels": [
+        {
+          "description": "Disable Thinking",
+          "effort": "none"
+        },
+        {
+          "description": "Enabled Thinking",
+          "effort": "high"
+        }
+      ],
+      "supports_image_detail_original": false,
+      "supports_parallel_tool_calls": false,
+      "supports_reasoning_summaries": true,
+      "supports_search_tool": false,
+      "truncation_policy": {
+        "limit": 10000,
+        "mode": "bytes"
+      },
+      "upgrade": null,
+      "visibility": "list"
+    },
+    {
+      "additional_speed_tiers": [],
+      "availability_nux": null,
+      "base_instructions": "You are Codex, a coding agent. You and the user share the same workspace and collaborate to achieve the user's goals.",
+      "context_window": 1000000,
       "default_reasoning_level": "high",
       "default_reasoning_summary": "none",
       "description": "Kimi K3",
@@ -359,7 +402,7 @@
         "text",
         "image"
       ],
-      "max_context_window": 272000,
+      "max_context_window": 1000000,
       "priority": 1008,
       "service_tiers": [],
       "shell_type": "shell_command",
@@ -391,7 +434,7 @@
       "additional_speed_tiers": [],
       "availability_nux": null,
       "base_instructions": "You are Codex, a coding agent. You and the user share the same workspace and collaborate to achieve the user's goals.",
-      "context_window": 272000,
+      "context_window": 1000000,
       "default_reasoning_level": "high",
       "default_reasoning_summary": "none",
       "description": "GLM 5.3",
@@ -402,7 +445,7 @@
         "text",
         "image"
       ],
-      "max_context_window": 272000,
+      "max_context_window": 1000000,
       "priority": 1009,
       "service_tiers": [],
       "shell_type": "shell_command",

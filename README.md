@@ -196,6 +196,15 @@ requires_openai_auth = true
 base_url = "https://api.cumob.com/v1"
 ```
 
+模型目录维护采用单一来源：
+
+- 新增、删除或修改聊天模型时，只编辑 `payload/cumob-models.json`
+- 安装器会从模型目录中选择 `priority` 最小、且 `supported_in_api = true`、`visibility = "list"` 的模型作为默认模型
+- 默认模型的 `default_reasoning_level` 也会自动写入 `model_reasoning_effort`
+- `SOURCE.json` 不再手动记录模型数量，安装测试会自动比较源目录和安装后的目录
+
+图片模型和视频模型属于 provider 配置，仍分别由 `payload/cumob-config.template.toml` 中的 `image_model` 和 `video_model` 管理。
+
 `base_url` 支持 `https://api.cumob.com/v1` 与 `https://api.cumob.cn/v1`。两个域名都有效。
 
 - 安装时交互选择端点：`1 = https://api.cumob.com/v1`（默认），`2 = https://api.cumob.cn/v1`

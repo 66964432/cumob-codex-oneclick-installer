@@ -313,6 +313,37 @@ function Ensure-ImageRuntime {
     return $status
 }
 
+function Get-DefaultModelFromCatalog {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path
+    )
+
+    try {
+        $catalog = [IO.File]::ReadAllText($Path) | ConvertFrom-Json
+    } catch {
+        throw "Invalid model catalog JSON: $($_.Exception.Message)"
+    }
+
+    $models = @($catalog.models)
+    $eligible = @($models | Where-Object {
+        $_ -and
+        $_.supported_in_api -eq $true -and
+        $_.visibility -eq "list" -and
+        -not [string]::IsNullOrWhiteSpace([string]$_.slug) -and
+        $null -ne $_.priority -and
+        -not [string]::IsNullOrWhiteSpace([string]$_.default_reasoning_level)
+    })
+    if ($eligible.Count -eq 0) {
+        throw "Invalid model catalog: no visible API-supported model with a valid priority"
+    }
+
+    $selected = $eligible | Sort-Object { [int]$_.priority } | Select-Object -First 1
+    return @{
+        Slug = [string]$selected.slug
+        ReasoningLevel = [string]$selected.default_reasoning_level
+    }
+}
+
 function Ensure-RuntimeAssets {
     $catalogSource = Join-Path $payloadDir "cumob-models.json"
     $templateSource = Join-Path $payloadDir "cumob-config.template.toml"
@@ -663,6 +694,9 @@ $templateSource = $runtimeAssets.TemplateSource
 $powerShellFallbackSource = $runtimeAssets.PowerShellFallbackSource
 $windowsImageLauncherSource = $runtimeAssets.WindowsImageLauncherSource
 $downloadRoot = $runtimeAssets.DownloadRoot
+$catalogDefaults = Get-DefaultModelFromCatalog -Path $catalogSource
+$defaultModel = $catalogDefaults.Slug
+$defaultReasoningLevel = $catalogDefaults.ReasoningLevel
 
 try {
     $imageRuntime = Ensure-ImageRuntime
@@ -848,6 +882,8 @@ try {
     $templateText = [IO.File]::ReadAllText($templateSource)
     $managedBody = $templateText.
         Replace("{{MODEL_CATALOG_PATH}}", $catalogTomlPath).
+        Replace("{{DEFAULT_MODEL}}", $defaultModel).
+        Replace("{{DEFAULT_REASONING_LEVEL}}", $defaultReasoningLevel).
         Replace("{{CUMOB_BASE_URL}}", $cumobBaseUrl).
         TrimEnd()
     $managedLines = New-Object "System.Collections.Generic.List[string]"
