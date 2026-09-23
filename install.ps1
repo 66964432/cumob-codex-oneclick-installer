@@ -337,7 +337,12 @@ function Get-DefaultModelFromCatalog {
         throw "Invalid model catalog: no visible API-supported model with a valid priority"
     }
 
-    $selected = $eligible | Sort-Object { [int]$_.priority } | Select-Object -First 1
+    $selected = $null
+    foreach ($candidate in $eligible) {
+        if ($null -eq $selected -or [int]$candidate.priority -lt [int]$selected.priority) {
+            $selected = $candidate
+        }
+    }
     return @{
         Slug = [string]$selected.slug
         ReasoningLevel = [string]$selected.default_reasoning_level
@@ -881,10 +886,10 @@ try {
     $catalogTomlPath = $catalogTarget.Replace("\", "/").Replace('"', '\"')
     $templateText = [IO.File]::ReadAllText($templateSource)
     $managedBody = $templateText.
-        Replace("{{MODEL_CATALOG_PATH}}", $catalogTomlPath).
-        Replace("{{DEFAULT_MODEL}}", $defaultModel).
-        Replace("{{DEFAULT_REASONING_LEVEL}}", $defaultReasoningLevel).
-        Replace("{{CUMOB_BASE_URL}}", $cumobBaseUrl).
+        Replace("{{MODEL_CATALOG_PATH}}", [string]$catalogTomlPath).
+        Replace("{{DEFAULT_MODEL}}", [string]$defaultModel).
+        Replace("{{DEFAULT_REASONING_LEVEL}}", [string]$defaultReasoningLevel).
+        Replace("{{CUMOB_BASE_URL}}", [string]$cumobBaseUrl).
         TrimEnd()
     $managedLines = New-Object "System.Collections.Generic.List[string]"
     $managedLines.Add("# BEGIN CUMOB CODEX ONE-CLICK INSTALLER")
