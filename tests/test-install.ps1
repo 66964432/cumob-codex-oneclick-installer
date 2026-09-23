@@ -115,7 +115,10 @@ localeOverride = "zh-CN"
         Sort-Object { [int]$_.priority } |
         Select-Object -First 1)
     $configuredModel = [regex]::Match($config, '(?m)^model\s*=\s*"([^"]+)"$')
-    if (-not $configuredModel.Success -or $configuredModel.Groups[1].Value -ne [string]$expectedDefault.slug) { throw "default model was not derived from the catalog" }
+    if (-not $configuredModel.Success -or $configuredModel.Groups[1].Value -ne [string]$expectedDefault.slug) {
+        $actualModel = if ($configuredModel.Success) { $configuredModel.Groups[1].Value } else { "<missing>" }
+        throw "default model was not derived from the catalog (expected=$($expectedDefault.slug), actual=$actualModel)"
+    }
     $configuredReasoning = [regex]::Match($config, '(?m)^model_reasoning_effort\s*=\s*"([^"]+)"$')
     if (-not $configuredReasoning.Success -or $configuredReasoning.Groups[1].Value -ne [string]$expectedDefault.default_reasoning_level) { throw "default reasoning level was not derived from the catalog" }
     if (-not (Test-Path -LiteralPath $powerShellFallback -PathType Leaf)) { throw "PowerShell image fallback was not installed" }
