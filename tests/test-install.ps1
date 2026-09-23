@@ -114,12 +114,12 @@ localeOverride = "zh-CN"
         Where-Object { $_.supported_in_api -eq $true -and $_.visibility -eq "list" } |
         Sort-Object { [int]$_.priority } |
         Select-Object -First 1)
-    $configuredModel = [regex]::Match($config, '(?m)^model\s*=\s*"([^"]+)"$')
+    $configuredModel = [regex]::Match($config, '(?m)^model\s*=\s*"([^"]+)"\r?$')
     if (-not $configuredModel.Success -or $configuredModel.Groups[1].Value -ne [string]$expectedDefault.slug) {
         $actualModel = if ($configuredModel.Success) { $configuredModel.Groups[1].Value } else { "<missing>" }
         throw "default model was not derived from the catalog (expected=$($expectedDefault.slug), actual=$actualModel)"
     }
-    $configuredReasoning = [regex]::Match($config, '(?m)^model_reasoning_effort\s*=\s*"([^"]+)"$')
+    $configuredReasoning = [regex]::Match($config, '(?m)^model_reasoning_effort\s*=\s*"([^"]+)"\r?$')
     if (-not $configuredReasoning.Success -or $configuredReasoning.Groups[1].Value -ne [string]$expectedDefault.default_reasoning_level) { throw "default reasoning level was not derived from the catalog" }
     if (-not (Test-Path -LiteralPath $powerShellFallback -PathType Leaf)) { throw "PowerShell image fallback was not installed" }
     if (-not (Test-Path -LiteralPath $windowsImageLauncher -PathType Leaf)) { throw "Windows image launcher was not installed" }
